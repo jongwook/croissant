@@ -1,12 +1,9 @@
 <!doctype html>
-<html>
+<html ng-app="croissant">
 <head>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.js"></script>
+	<title ng-bind="title"></title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
 	<script src="app/app.js"></script>
 </head>
-<body>
-	<div ng-app="login">
-		log in with {{'google' + ' ' + 'drive'}}
-	</div>
-</body>
+<body ng-view></body>
 </html>

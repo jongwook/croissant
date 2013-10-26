@@ -1,0 +1,1 @@
+module auth { export var html =  '<link rel="stylesheet" type="text/css" href="css/auth.css"><div id="auth-content">	<div id="auth-logo">		&#67;roissant	</div>	<div id="auth-login">		<a ng-click="vm.auth()">Sign in with Google</a>	</div></div>' } 
