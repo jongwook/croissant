@@ -19,10 +19,10 @@
 				<li>
 					<span class="folder"></span><span class="child">Google Drive</span>
 				</li>
-				<li style="padding-left: {{10 * $index}}px" ng-repeat="item in path">
+				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? 'deep' : 'deeper'}}" ng-repeat="item in path">
 					<span class="L"></span><span class="folder"></span><span class="child">{{item}}</span>
 				</li>
-				<li style="padding-left: {{10 * path.length}}px" ng-repeat="child in children">
+				<li style="padding-left: {{10 * path.length}}px" class="{{path.length == 0 ? 'deep' : 'deeper'}}" ng-repeat="child in children">
 					<span class="L"></span><span class="folder"></span><span class="child">{{child}}</span>
 				</li>
 			</ul>
