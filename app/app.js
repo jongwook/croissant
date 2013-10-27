@@ -67,7 +67,7 @@ var Croissant;
             this.children = children;
             this.parent = parent;
         }
-        Folder.prototype.addDirectory = function (path, id) {
+        Folder.prototype.addFolder = function (path, id) {
             if (typeof id === "undefined") { id = null; }
             var components = path.split("/").filter(function (s) {
                 return s.length > 0;
@@ -82,10 +82,15 @@ var Croissant;
                 }
 
                 if (components.length === 0) {
-                    this.children[name].id = id;
+                    if (this.children[name] instanceof Folder) {
+                        this.children[name].id = id;
+                        return this.children[name];
+                    } else {
+                        console.warn(name + " already exists and not a directory");
+                    }
                 } else if (this.children[name] instanceof Folder) {
                     var child = this.children[name];
-                    child.addDirectory(components.join("/"), id);
+                    return child.addFolder(components.join("/"), id);
                 } else {
                     console.warn(name + " already exists and not a directory");
                 }
@@ -96,8 +101,6 @@ var Croissant;
             var components = path.split("/").filter(function (s) {
                 return s.length > 0;
             });
-
-            console.log("Adding " + file.name + " at " + path);
 
             if (components.length === 0) {
                 var name = file.name;
@@ -132,18 +135,23 @@ var Croissant;
         var QUERY_FOLDER = "mimeType = 'application/vnd.google-apps.folder' and trashed = false";
         var MAX_RESULTS = 1000;
 
+        Drive.ROOT = "root";
+
         var callbacks = [];
         var loaded = false;
 
-        var root = new Croissant.Folder("root", "My Drive");
+        var root;
         var files = {};
+        var folders = {};
 
         var extensions = [/.mp3$/, /.wav$/];
         var types = ["audio/mpeg"];
 
         window["Croissant.Drive.load"] = function () {
-            console.log("api loaded : " + gapi);
-            console.log("Callbacks : " + callbacks.length);
+            console.log("gapi loaded");
+
+            root = new Croissant.Folder(Drive.ROOT, "My Drive");
+            folders[Drive.ROOT] = root;
 
             var self = this;
             gapi.client.load('drive', 'v2', function () {
@@ -174,7 +182,7 @@ var Croissant;
         }
         Drive.authorize = authorize;
 
-        function loadAllFiles() {
+        function loadAllFiles(callback) {
             var retrieve = function (request) {
                 request.execute(function (response) {
                     if (!response || response.error) {
@@ -198,7 +206,7 @@ var Croissant;
                         retrieve(request);
                     } else {
                         console.log("File loading complete; loading tree");
-                        loadFileTree("root", "");
+                        loadFileTree(Drive.ROOT, "", callback);
                     }
                 });
             };
@@ -214,7 +222,7 @@ var Croissant;
         var loading_filetrees = 0;
         var loading_subtrees = 0;
 
-        function loadSubTree(folderId, path) {
+        function loadSubTree(folderId, path, callback) {
             loading_subtrees++;
             var retrieve = function (request, folderId, path) {
                 request.execute(function (response) {
@@ -223,7 +231,7 @@ var Croissant;
                         throw new Error("loadSubTree error");
                     }
                     angular.forEach(response.items, function (item) {
-                        loadFileTree(item.id, path);
+                        loadFileTree(item.id, path, callback);
                     });
                     if (response.nextPageToken) {
                         request = gapi.client.drive.children.list({
@@ -237,6 +245,7 @@ var Croissant;
                         loading_subtrees--;
                         if (loading_filetrees === 0 && loading_subtrees === 0) {
                             console.log("Loading finished");
+                            callback();
                         }
                     }
                 });
@@ -253,7 +262,7 @@ var Croissant;
             });
         }
 
-        function loadFileTree(folderId, path) {
+        function loadFileTree(folderId, path, callback) {
             loading_filetrees++;
             var retrieve = function (request, folderId, path) {
                 request.execute(function (response) {
@@ -265,6 +274,7 @@ var Croissant;
                         if (files[item.id]) {
                             var file = files[item.id];
                             console.log("Found " + file.name + " at " + (path ? path : "/"));
+                            callback();
                             root.addFile(path, new Croissant.File(item.id, file.name, file.size));
                         }
                     });
@@ -279,7 +289,7 @@ var Croissant;
                     } else {
                         loading_filetrees--;
 
-                        loadSubTree(folderId, path);
+                        loadSubTree(folderId, path, callback);
                     }
                 });
             };
@@ -292,8 +302,13 @@ var Croissant;
                     q: QUERY_AUDIO,
                     maxResults: MAX_RESULTS
                 });
-                var subpath = (folderId === "root") ? "" : path + "/" + item.title;
-                root.addDirectory(subpath, folderId);
+                var subpath = (folderId === Drive.ROOT) ? "" : path + "/" + item.title;
+
+                if (folderId !== Drive.ROOT) {
+                    var folder = root.addFolder(subpath, folderId);
+                    folders[folderId] = folder;
+                }
+
                 retrieve(request, folderId, subpath);
             });
         }
@@ -302,6 +317,16 @@ var Croissant;
             return root;
         }
         Drive.getRoot = getRoot;
+
+        function getFolder(id) {
+            return folders[id];
+        }
+        Drive.getFolder = getFolder;
+
+        function getFile(id) {
+            return files[id];
+        }
+        Drive.getFile = getFile;
     })(Croissant.Drive || (Croissant.Drive = {}));
     var Drive = Croissant.Drive;
 })(Croissant || (Croissant = {}));
@@ -311,7 +336,7 @@ var auth;
 })(auth || (auth = {}));
 var browse;
 (function (browse) {
-    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px">Google Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="item in vm.path">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px">{{item}}</span>				</li>				<li style="padding-left: {{10 * vm.path.length}}px" class="{{vm.path.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.path.length}}px">{{child}}</span>				</li>			</ul>		</div>		<div id="content">			<div id="tracklist">				<div id="tracklist-album-detail">					<div id="tracklist-album-art">						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">					</div>					<div id="tracklist-album-title">						Adele_21					</div>					<div id="tracklist-album-options">						⊕⊕					</div>				</div>				<div id="tracklist-album-data">					<div>Tracks</div>					<ul id="tracklist-tracks">						<li ng-repeat="track in vm.tracks">{{track}}</li>					</ul>				</div>			</div>		</div>	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
+    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.path.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div id="tracklist">				<div id="tracklist-album-detail">					<div id="tracklist-album-art">						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">					</div>					<div id="tracklist-album-title">						Adele_21					</div>					<div id="tracklist-album-options">						⊕⊕					</div>				</div>				<div id="tracklist-album-data">					<div>Tracks</div>					<ul id="tracklist-tracks">						<li ng-repeat="track in vm.tracks">{{track}}</li>					</ul>				</div>			</div>		</div>	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
 })(browse || (browse = {}));
 var main;
 (function (main) {
@@ -357,10 +382,11 @@ var Croissant;
             this.$scope = $scope;
             this.$location = $location;
             this.safeApply = safeApply;
-            this.path = ['path', 'to', 'folder'];
-            this.children = ['Adele_21', 'Adele_22', 'Adele_23'];
             this.tracks = ['01 Rolling in the Deep', '02 Rumor has it', '03 Tuming Tables', '04 Dont You Remember', '05 Set Fire to the Rain', '06 He Wont Go', '07 Take It All', '08 Ill Be Waiting', '09 One and Only', '10 Lovesong', '11 Someone Like You'];
+            this.children = [new Croissant.Folder(null, "loading...")];
             $scope.vm = this;
+            this.root = Croissant.Drive.getRoot();
+            this.select(Croissant.Drive.ROOT);
 
             Croissant.Drive.onload(function () {
                 console.log("Checking if logged in...");
@@ -377,7 +403,32 @@ var Croissant;
         }
         BrowseController.prototype.init = function () {
             console.log("loading...");
-            Croissant.Drive.loadAllFiles();
+            var self = this;
+            Croissant.Drive.loadAllFiles(function () {
+                self.select(Croissant.Drive.ROOT);
+                self.$scope.$apply();
+            });
+        };
+
+        BrowseController.prototype.select = function (id) {
+            var folder = Croissant.Drive.getFolder(id);
+
+            if (!folder) {
+                return;
+            }
+
+            this.ancestors = [];
+            while (folder.parent != null) {
+                this.ancestors.unshift(folder);
+                folder = folder.parent;
+            }
+
+            var c = this.children = [];
+            angular.forEach(folder.children, function (node) {
+                if (node instanceof Croissant.Folder) {
+                    c.push(node);
+                }
+            });
         };
         return BrowseController;
     })();

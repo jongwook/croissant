@@ -18,7 +18,7 @@ module Croissant {
 			super(id, name);
 		}
 
-		addDirectory(path: string, id: string = null) {
+		addFolder(path: string, id: string = null): Folder {
 			var components = path.split("/").filter(s => s.length > 0);
 
 			if (components.length > 0) {
@@ -30,10 +30,15 @@ module Croissant {
 				}
 
 				if (components.length === 0) {
-					this.children[name].id = id;
+					if (this.children[name] instanceof Folder) {
+						this.children[name].id = id;
+						return <Folder>this.children[name];
+					} else {
+						console.warn(name + " already exists and not a directory");
+					}
 				} else if (this.children[name] instanceof Folder) {
 					var child = <Folder>this.children[name];
-					child.addDirectory(components.join("/"), id);
+					return child.addFolder(components.join("/"), id);
 				} else {
 					console.warn(name + " already exists and not a directory");
 				}
@@ -42,8 +47,6 @@ module Croissant {
 
 		addFile(path: string, file: File) {
 			var components = path.split("/").filter(s => s.length > 0);
-
-			console.log("Adding " + file.name + " at " + path);
 
 			if (components.length === 0) {
 				var name = file.name;
