@@ -1,1 +1,1 @@
-module main { export var html =  '<div></div>' } 
+module main { export var html =  '<div id="header">	<div id="header-content">		<div id="header-logo">			&#67;roissant		</div>	</div></div>' } 

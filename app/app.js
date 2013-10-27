@@ -4,7 +4,7 @@
 })(auth || (auth = {}));
 var main;
 (function (main) {
-    main.html = '<div></div>';
+    main.html = '<div id="header">	<div id="header-content">		<div id="header-logo">			&#67;roissant		</div>	</div></div>';
 })(main || (main = {}));
 var Croissant;
 (function (Croissant) {

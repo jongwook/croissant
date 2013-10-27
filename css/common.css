@@ -4,6 +4,7 @@ html, body {
 	background: linear-gradient(#393939, #282828);
 	height: 100%;
 	font-family: "Nanum Gothic", Helvetica;
+	margin: 0;
 }
 
 div {
