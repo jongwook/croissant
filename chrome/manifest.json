@@ -5,10 +5,10 @@
   "version": "0.0.1",
   "app": {
     "urls": [
-      "*://croissant.lyomi.net"
+      "http://croissant.lyomi.net/"
     ],
     "launch": {
-      "web_url": "http://croissant.lyomi.net"
+      "web_url": "http://croissant.lyomi.net/"
     }
   },
   "icons": {
