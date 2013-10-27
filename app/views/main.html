@@ -17,13 +17,13 @@
 		<div id="sidebar">
 			<ul id="sidebar-folders" ng-init="path=['path','to','folder'];children=['Adele_21', 'Adele_22', 'Adele_23'];">
 				<li>
-					<span class="folder"></span><span class="child">Google Drive</span>
+					<span class="folder"></span><span class="child" style="width: 200px">Google Drive</span>
 				</li>
 				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? 'deep' : 'deeper'}}" ng-repeat="item in path">
-					<span class="L"></span><span class="folder"></span><span class="child">{{item}}</span>
+					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px">{{item}}</span>
 				</li>
 				<li style="padding-left: {{10 * path.length}}px" class="{{path.length == 0 ? 'deep' : 'deeper'}}" ng-repeat="child in children">
-					<span class="L"></span><span class="folder"></span><span class="child">{{child}}</span>
+					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * path.length}}px">{{child}}</span>
 				</li>
 			</ul>
 		</div>
