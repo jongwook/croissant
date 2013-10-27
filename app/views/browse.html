@@ -28,24 +28,25 @@
 			</ul>
 		</div>
 		<div id="content">
-			<div id="tracklist">
-				<div id="tracklist-album-detail">
-					<div id="tracklist-album-art">
+			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">
+				<div class="tracklist-album-detail">
+					<div class="tracklist-album-art">
 						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">
 					</div>
-					<div id="tracklist-album-title">
-						Adele_21
+					<div class="tracklist-album-title">
+						{{name}}
 					</div>
-					<div id="tracklist-album-options">
+					<div class="tracklist-album-options">
 						⊕⊕
 					</div>
 				</div>
-				<div id="tracklist-album-data">
+				<div class="tracklist-album-data">
 					<div>Tracks</div>
-					<ul id="tracklist-tracks">
-						<li ng-repeat="track in vm.tracks">{{track}}</li>
+					<ul class="tracklist-tracks">
+						<li ng-repeat="track in tracks">{{track.name}}</li>
 					</ul>
 				</div>
+				<div class="clear"></div>
 			</div>
 		</div>
 	</div>

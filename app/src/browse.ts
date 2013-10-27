@@ -7,17 +7,20 @@ module Croissant {
 
 		ancestors: Folder[];
 		children: Folder[] = [new Folder(null, "loading...")];
+		albums: {[album: string]: File[]} = {};
 
 		constructor(private $scope, private $location, private safeApply) {
 			$scope.vm = this;
+
 			this.root = Drive.getRoot();
 			this.select(Drive.ROOT);
 
+			var self = this;
 			Drive.onload(function() {
 				console.log("Checking if logged in...");
 				Drive.authorize(true, () => {
 					console.log("Successfully authorized");
-					$scope.vm.init();
+					self.init();
 				}, (error: string) => {
 					console.log("Not authorized; moving to /auth");
 					safeApply($scope, () => {
@@ -38,6 +41,12 @@ module Croissant {
 				if (!self.loaded || (self.children.length === 1 && self.children[0].id === null)) {
 					self.select(Drive.ROOT, !completed);
 				}
+
+				if (self.selected) {
+					self.albums = {};
+					self.addFiles(self.selected, self.albums);
+				}
+
 				self.$scope.$apply();
 			});
 		}
@@ -48,6 +57,8 @@ module Croissant {
 			if (!folder) {
 				return;
 			}
+
+			this.selected = folder;
 
 			this.loaded = true;
 
@@ -66,6 +77,22 @@ module Croissant {
 			if (!(id === Drive.ROOT && !this.completed && c.length === 0)) {
 				this.children = c;
 			}
+
+			this.albums = {};
+			this.addFiles(folder, this.albums);
+		}
+
+		addFiles(folder: Folder, albums: {[album: string]: File[]}) {
+			var self = this;
+			angular.forEach(folder.children, (node) => {
+				if (node instanceof File) {
+					var name = node.parent.name;
+					albums[name] = albums[name] || [];
+					albums[name].push(<File>node);
+				} else if (node instanceof Folder) {
+					self.addFiles(<Folder>node, albums);
+				}
+			});
 		}
 	}
 }

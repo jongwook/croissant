@@ -29,9 +29,8 @@ module Croissant {
 			root = new Folder(ROOT, "My Drive");
 			folders[ROOT] = root;
 
-			var self = this;
 			gapi.client.load('drive', 'v2', () => {
-				self.loaded = true;
+				loaded = true;
 				angular.forEach(callbacks, function(callback) {
 					callback();
 				});
