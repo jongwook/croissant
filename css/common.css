@@ -3,9 +3,14 @@
 html, body {
 	margin: 0;
 	height: 100%;
+	color: #56462a;
 	background: linear-gradient(#393939, #282828);
 	font-family: "Nanum Gothic", Helvetica;
 	-webkit-font-smoothing: antialiased;
+}
+
+ng-view {
+	width: 100%;
 }
 
 div, input {
