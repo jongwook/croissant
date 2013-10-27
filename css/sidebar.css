@@ -23,6 +23,10 @@
 	line-height: 40px;
 }
 
+#sidebar li.selected {
+	background: #cfb152;
+}
+
 #sidebar li.deep {
 	height: 30px;
 	line-height: 30px;

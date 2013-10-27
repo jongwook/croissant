@@ -19,7 +19,7 @@
 				<li>
 					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select('root')">My Drive</span>
 				</li>
-				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? 'deep' : 'deeper'}}" ng-repeat="ancestor in vm.ancestors">
+				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? 'deep' : 'deeper'}} {{$index + 1 == vm.ancestors.length ? 'selected' : ''}}" ng-repeat="ancestor in vm.ancestors">
 					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>
 				</li>
 				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.path.length == 0 ? 'deep' : 'deeper'}}" ng-repeat="child in vm.children">
