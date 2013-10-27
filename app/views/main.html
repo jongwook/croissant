@@ -15,13 +15,14 @@
 
 	<div id="main">
 		<div id="sidebar">
-			<ul id="sidebar-parents" ng-init="path=['path','to','folder']">
-				<li style="padding-left: {{20 * $index}}px" ng-repeat="item in path">
+			<ul id="sidebar-folders" ng-init="path=['path','to','folder'];children=['Adele_21', 'Adele_22', 'Adele_23'];">
+				<li>
+					<span class="folder"></span><span class="child">Google Drive</span>
+				</li>
+				<li style="padding-left: {{10 * $index}}px" ng-repeat="item in path">
 					<span class="L"></span><span class="folder"></span><span class="child">{{item}}</span>
 				</li>
-			</ul>
-			<ul id="sidebar-children" ng-init="children=['Adele_21', 'Adele_22', 'Adele_23']; depth=2">
-				<li style="padding-left: {{20 * path.length}}px" ng-repeat="child in children">
+				<li style="padding-left: {{10 * path.length}}px" ng-repeat="child in children">
 					<span class="L"></span><span class="folder"></span><span class="child">{{child}}</span>
 				</li>
 			</ul>
