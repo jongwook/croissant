@@ -2,9 +2,12 @@
 <html ng-app="croissant">
 <head>
 	<title ng-bind="title"></title>
+	<link rel="stylesheet" type="text/css" href="css/all.css">
+</head>
+<body>
+	<ng-view></ng-view>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js"></script>
 	<script src="app/app.js"></script>
 	<script src="https://apis.google.com/js/client.js?onload=Croissant.Drive.load"></script>
-</head>
-<body ng-view></body>
+</body>
 </html>

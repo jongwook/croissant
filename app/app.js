@@ -1,6 +1,6 @@
 ﻿var auth;
 (function (auth) {
-    auth.html = '<link rel="stylesheet" type="text/css" href="css/auth.css"><div id="auth-content">	<div id="auth-logo">		&#67;roissant	</div>	<div id="auth-login">		<a ng-click="vm.auth()">Sign in with Google</a>	</div></div>';
+    auth.html = '<div id="auth-content">	<div id="auth-logo">		&#67;roissant	</div>	<div id="auth-login">		<a ng-click="vm.auth()">Sign in with Google</a>	</div></div>';
 })(auth || (auth = {}));
 var main;
 (function (main) {
