@@ -3,43 +3,21 @@ module Croissant {
 	declare var webkitAudioContext: any;
 
 	croissant.factory("$player", function() {
-		var player = document.createElement("audio");
 		var context = new webkitAudioContext();
-		var $player = $(player);
-		$player.bind({
-			play: () => {
-				console.log("onplay");
-			},
-			pause: () => {
-				console.log("onpause");
-			},
-			error: (err) => {
-				console.log("onerrror", err);
-			},
-			timeupdate: () => {
-				console.log("ontimeupdate");
-			},
-			progress: () => {
-				console.log("onprogress");
-			},
-			ended: () => {
-				console.log("onended");
-			}
-		});
-
-		document.body.appendChild(player);
+		var audioSource = context.createBufferSource();
+		audioSource.connect(context.destination);
 
 		return {
-			play: (data: ArrayBuffer) => {
-				console.log("decoding : " + typeof data);
+			play: (data: ArrayBuffer, callback: (status:string) => void) => {
+				callback("Decoding...");
 				context.decodeAudioData(data, function(buffer) {
-					console.log("Decoded to : " + typeof buffer);
-					var audioSource = context.createBufferSource();
-					audioSource.connect(context.destination);
+					callback("Decoding complete!");
 
 					audioSource.buffer = buffer;
 					audioSource.noteOn(0);
 					audioSource.playbackRate.value = 1;
+
+					setTimeout(() => callback(""), 1000);
 				});
 			}
 		};
@@ -50,8 +28,9 @@ module Croissant {
 		playlist = "Basic Playlist";
 		album = "";
 		track = "";
+		status = "";
 
-		constructor(private $scope, private $player) {
+		constructor(private $scope, private safeApply, private $player) {
 			console.log("PlayerController constructed");
 			$scope.vm = this;
 
@@ -73,13 +52,13 @@ module Croissant {
 				xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
 				xhr.responseType = "arraybuffer";
 				xhr.onload = function() {
-					console.log("Got it : " + typeof(xhr.response));
-					self.$player.play(xhr.response);
+					self.status = "Buffering complete";
+					self.$player.play(xhr.response, (status: string) => self.safeApply(self.$scope, () => self.status = status));
 				};
 				xhr.onerror = function() {
 					console.error("Error while downloading music");
 				};
-				console.log("Downloading " + file.url + " ...");
+				self.status = "Buffering...";
 				xhr.send();
 			} else {
 				console.warn("Tried to download invalid url : " + file.name);
