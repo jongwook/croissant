@@ -336,7 +336,7 @@ var auth;
 })(auth || (auth = {}));
 var browse;
 (function (browse) {
-    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.path.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>					<div class="tracklist-album-options">						⊕⊕					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>		</div>	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
+    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			{{vm.text}}		</div>	</div></div>';
 })(browse || (browse = {}));
 var main;
 (function (main) {
@@ -407,6 +407,7 @@ var Croissant;
             });
         }
         BrowseController.prototype.init = function () {
+            var _this = this;
             console.log("loading...");
             var self = this;
             Croissant.Drive.loadAllFiles(function (completed) {
@@ -416,8 +417,7 @@ var Croissant;
                 }
 
                 if (self.selected) {
-                    self.albums = {};
-                    self.addFiles(self.selected, self.albums);
+                    _this.reloadAlbums(self.selected);
                 }
 
                 self.$scope.$apply();
@@ -452,8 +452,17 @@ var Croissant;
                 this.children = c;
             }
 
+            this.reloadAlbums(folder);
+        };
+
+        BrowseController.prototype.reloadAlbums = function (folder) {
             this.albums = {};
             this.addFiles(folder, this.albums);
+            angular.forEach(this.albums, function (album) {
+                album.sort(function (x, y) {
+                    return x.name > y.name ? 1 : -1;
+                });
+            });
         };
 
         BrowseController.prototype.addFiles = function (folder, albums) {
@@ -494,6 +503,50 @@ var Croissant;
         return MainController;
     })();
     Croissant.MainController = MainController;
+})(Croissant || (Croissant = {}));
+var Croissant;
+(function (Croissant) {
+    Croissant.croissant.factory("$player", function () {
+        var player = document.createElement("audio");
+
+        $(player).bind({
+            play: function () {
+                console.log("onplay");
+            },
+            pause: function () {
+                console.log("onpause");
+            },
+            error: function (err) {
+                console.log("onerrror : " + err);
+            },
+            timeupdate: function () {
+                console.log("ontimeupdate");
+            },
+            progress: function () {
+                console.log("onprogress");
+            },
+            ended: function () {
+                console.log("onended");
+            }
+        });
+
+        document.body.appendChild(player);
+
+        return {
+            foo: "bar"
+        };
+    });
+
+    var PlayerController = (function () {
+        function PlayerController($scope, $player) {
+            this.text = "hello";
+            console.log("PlayerController constructed");
+            $scope.vm = this;
+            this.text = $player.foo;
+        }
+        return PlayerController;
+    })();
+    Croissant.PlayerController = PlayerController;
 })(Croissant || (Croissant = {}));
 var Croissant;
 (function (Croissant) {

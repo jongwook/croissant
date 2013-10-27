@@ -22,7 +22,7 @@
 				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? 'deep' : 'deeper'}} {{$index + 1 == vm.ancestors.length ? 'selected' : ''}}" ng-repeat="ancestor in vm.ancestors">
 					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>
 				</li>
-				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.path.length == 0 ? 'deep' : 'deeper'}}" ng-repeat="child in vm.children">
+				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? 'deep' : 'deeper'}}" ng-repeat="child in vm.children">
 					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>
 				</li>
 			</ul>
@@ -31,13 +31,10 @@
 			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">
 				<div class="tracklist-album-detail">
 					<div class="tracklist-album-art">
-						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">
+						<img src="images/album.jpg">
 					</div>
 					<div class="tracklist-album-title">
 						{{name}}
-					</div>
-					<div class="tracklist-album-options">
-						⊕⊕
 					</div>
 				</div>
 				<div class="tracklist-album-data">
@@ -51,9 +48,9 @@
 		</div>
 	</div>
 
-	<div id="player-bar">
+	<div id="player-bar" ng-controller="Croissant.PlayerController">
 		<div id="player">
-
+			{{vm.text}}
 		</div>
 	</div>
 </div>

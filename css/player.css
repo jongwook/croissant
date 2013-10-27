@@ -3,8 +3,17 @@
 	position: absolute;
 	bottom: 0;
 	width: 100%;
-	height: 70px;
-	background: #ecce74;
+	height: 140px;
+	background: #1b1c1c;
+	border-top: 2px solid #ebc85e;
+}
+
+#player-bar:before {
+	display: block;
+	width: 100%;
+	background-color: #b89d49;
+	content: "";
+	height: 1px;
 }
 
 #player {

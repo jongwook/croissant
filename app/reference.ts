@@ -13,6 +13,7 @@
 /// <reference path="src/auth.ts" />
 /// <reference path="src/browse.ts" />
 /// <reference path="src/main.ts" />
+/// <reference path="src/player.ts" />
 /// <reference path="src/util.ts" />
 //grunt-end
 

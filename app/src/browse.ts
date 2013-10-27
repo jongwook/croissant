@@ -43,8 +43,7 @@ module Croissant {
 				}
 
 				if (self.selected) {
-					self.albums = {};
-					self.addFiles(self.selected, self.albums);
+					this.reloadAlbums(self.selected);
 				}
 
 				self.$scope.$apply();
@@ -78,8 +77,15 @@ module Croissant {
 				this.children = c;
 			}
 
+			this.reloadAlbums(folder);
+		}
+
+		reloadAlbums(folder: Folder) {
 			this.albums = {};
 			this.addFiles(folder, this.albums);
+			angular.forEach(this.albums, (album) => {
+				album.sort((x, y) => x.name > y.name ? 1 : -1);
+			});
 		}
 
 		addFiles(folder: Folder, albums: {[album: string]: File[]}) {

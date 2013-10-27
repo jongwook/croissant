@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Croissant",
+  "description": "Google Drive Music Player",
+  "version": "0.0.1",
+  "app": {
+    "urls": [
+      "*://croissant.lyomi.net"
+    ],
+    "launch": {
+      "web_url": "http://croissant.lyomi.net"
+    }
+  },
+  "icons": {
+    "128": "icon_128.png",
+    "256": "icon_256.png"
+  },
+  "permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}
