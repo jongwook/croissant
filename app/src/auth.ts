@@ -1,5 +1,3 @@
-/// <reference path="croissant.ts">
-/// <reference path="drive.ts">
 
 module Croissant {
 	export class AuthController {
