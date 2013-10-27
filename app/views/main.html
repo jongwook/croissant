@@ -15,7 +15,16 @@
 
 	<div id="main">
 		<div id="sidebar">
-
+			<ul id="sidebar-parents" ng-init="path=['path','to','folder']">
+				<li style="padding-left: {{20 * $index}}px" ng-repeat="item in path">
+					<span class="L"></span><span class="folder"></span><span class="child">{{item}}</span>
+				</li>
+			</ul>
+			<ul id="sidebar-children" ng-init="children=['Adele_21', 'Adele_22', 'Adele_23']; depth=2">
+				<li style="padding-left: {{20 * path.length}}px" ng-repeat="child in children">
+					<span class="L"></span><span class="folder"></span><span class="child">{{child}}</span>
+				</li>
+			</ul>
 		</div>
 		<div id="content">
 			<div id="tracklist">
@@ -32,18 +41,8 @@
 				</div>
 				<div id="tracklist-album-data">
 					<div>Tracks</div>
-					<ul id="tracklist-tracks">
-						<li>01 Rolling in the Deep</li>
-						<li>02 Rumor has it</li>
-						<li>03 Tuming Tables</li>
-						<li>04 Don't You Remember</li>
-						<li>05 Set Fire to the Rain</li>
-						<li>06 He Won't Go</li>
-						<li>07 Take It All</li>
-						<li>08 I'll Be Waiting</li>
-						<li>09 One and Only</li>
-						<li>10 Lovesong</li>
-						<li>11 Someone Like You</li>
+					<ul id="tracklist-tracks" ng-init="tracks = ['01 Rolling in the Deep','02 Rumor has it','03 Tuming Tables','04 Dont You Remember','05 Set Fire to the Rain','06 He Wont Go','07 Take It All','08 Ill Be Waiting','09 One and Only','10 Lovesong','11 Someone Like You']">
+						<li ng-repeat="track in tracks">{{track}}</li>
 					</ul>
 				</div>
 			</div>

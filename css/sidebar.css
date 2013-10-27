@@ -3,6 +3,48 @@
 	float: left;
 	width: 300px;
 	height: 100%;
+	padding: 15px;
 	border: 10px solid #b49a47;
 	background-color: #ece6d1;
+
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+#sidebar ul {
+	margin: 0;
+	padding: 0;
+}
+
+#sidebar li {
+	list-style: none;
+	padding: 0;
+	height: 40px;
+	line-height: 40px;
+}
+
+#sidebar .L {
+	display: inline-block;
+	width: 16px;
+	height: 40px;
+	background-image: url(../images/L.png);
+	background-size: 16px 16px;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+
+#sidebar .folder {
+	display: inline-block;
+	width: 40px;
+	height: 40px;
+	background-image: url(../images/folder.png);
+	background-size: 40px 40px;
+}
+
+#sidebar .child {
+	display: inline-block;
+	position: relative;
+	top: -15px;
+	left: 5px;
+	height: 40px;
 }
