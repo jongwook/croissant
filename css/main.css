@@ -67,13 +67,30 @@
 	background-color: transparent;
 }
 
-#content {
+#main {
 	border-top: 50px solid rgba(0,0,0,0);
 	border-bottom: 70px solid rgba(0,0,0,0);
 	margin: auto;
 	width: 960px;
 	height: 100%;
 	background: #b49a47;
+}
+
+#sidebar {
+	float: left;
+	width: 300px;
+	height: 100%;
+	border: 10px solid #b49a47;
+	background-color: #ece6d1;
+}
+
+#content {
+	float: right;
+	width: 660px;
+	height: 100%;
+	border: 10px solid #b49a47;
+	border-left-width: 0;
+	background-color: #ece6d1;
 }
 
 #player-bar {

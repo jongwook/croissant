@@ -4,7 +4,7 @@
 })(auth || (auth = {}));
 var main;
 (function (main) {
-    main.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="content">	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
+    main.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">		</div>		<div id="content">		</div>	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
 })(main || (main = {}));
 var Croissant;
 (function (Croissant) {
