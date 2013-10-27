@@ -13,10 +13,14 @@ ng-view {
 	width: 100%;
 }
 
-div, input {
+* {
 	box-sizing: border-box;
 	border: 0;
 	outline: none;
+}
+
+*:focus {
+	outline: 0;
 }
 
 a {
