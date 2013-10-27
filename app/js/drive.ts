@@ -12,6 +12,7 @@ module Croissant {
 		window["Croissant.Drive.load"] = function() {
 			loaded = true;
 			console.log("api loaded : " + gapi);
+			console.log("Callbacks : " + callbacks.length);
 
 			angular.forEach(callbacks, function(callback) {
 				callback();

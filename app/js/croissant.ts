@@ -1,6 +1,6 @@
 
 module Croissant {
-	export var croissant = angular.module("croissant", []);
+	export var croissant = angular.module("croissant", ["ngRoute"]);
 
 	croissant.config(($routeProvider) => {
 		$routeProvider

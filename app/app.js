@@ -4,7 +4,7 @@
 })(auth || (auth = {}));
 var main;
 (function (main) {
-    main.html = '';
+    main.html = '<div></div>';
 })(main || (main = {}));
 var Croissant;
 (function (Croissant) {
@@ -41,7 +41,7 @@ var Croissant;
 })(Croissant || (Croissant = {}));
 var Croissant;
 (function (Croissant) {
-    Croissant.croissant = angular.module("croissant", []);
+    Croissant.croissant = angular.module("croissant", ["ngRoute"]);
 
     Croissant.croissant.config(function ($routeProvider) {
         $routeProvider.when("/", {
@@ -94,6 +94,7 @@ var Croissant;
         window["Croissant.Drive.load"] = function () {
             loaded = true;
             console.log("api loaded : " + gapi);
+            console.log("Callbacks : " + callbacks.length);
 
             angular.forEach(callbacks, function (callback) {
                 callback();
@@ -136,6 +137,7 @@ var Croissant;
         function MainController($scope, $location, safeApply) {
             var self = this;
             Croissant.Drive.onload(function () {
+                console.log("Checking if logged in...");
                 Croissant.Drive.authorize(true, function () {
                     console.log("Successfully authorized");
                     self.init();

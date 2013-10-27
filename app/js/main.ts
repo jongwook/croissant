@@ -6,6 +6,7 @@ module Croissant {
 		constructor($scope, $location, safeApply) {
 			var self = this;
 			Drive.onload(function() {
+				console.log("Checking if logged in...");
 				Drive.authorize(true, () => {
 					console.log("Successfully authorized");
 					self.init();
