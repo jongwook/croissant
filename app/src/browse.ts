@@ -27,35 +27,45 @@ module Croissant {
 			});
 		}
 
+		loaded = false;
+		completed = false;
+
 		init() {
 			console.log("loading...");
 			var self = this;
-			Drive.loadAllFiles(() => {
-				self.select(Drive.ROOT);
+			Drive.loadAllFiles((completed) => {
+				self.completed = completed;
+				if (!self.loaded || (self.children.length === 1 && self.children[0].id === null)) {
+					self.select(Drive.ROOT, !completed);
+				}
 				self.$scope.$apply();
 			});
 		}
 
-		select(id: string) {
+		select(id: string, loading: boolean = false) {
 			var folder = Drive.getFolder(id);
 
 			if (!folder) {
 				return;
 			}
 
+			this.loaded = true;
+
 			this.ancestors = [];
-			while (folder.parent != null) {
-				this.ancestors.unshift(folder);
-				folder = folder.parent;
+			for (var f = folder; f.parent != null; f = f.parent) {
+				this.ancestors.unshift(f);
 			}
 
-			var c = this.children = [];
+			var c = [];
 			angular.forEach(folder.children, (node) => {
 				if (node instanceof Folder) {
 					c.push(<Folder>node);
 				}
 			});
-		}
 
+			if (!(id === Drive.ROOT && !this.completed && c.length === 0)) {
+				this.children = c;
+			}
+		}
 	}
 }

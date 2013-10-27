@@ -111,6 +111,7 @@ var Croissant;
 
                 if (!this.children[name]) {
                     this.children[name] = new Folder(null, name);
+                    this.children[name].parent = this;
                 }
 
                 if (this.children[name] instanceof Folder) {
@@ -245,7 +246,7 @@ var Croissant;
                         loading_subtrees--;
                         if (loading_filetrees === 0 && loading_subtrees === 0) {
                             console.log("Loading finished");
-                            callback();
+                            callback(true);
                         }
                     }
                 });
@@ -274,7 +275,7 @@ var Croissant;
                         if (files[item.id]) {
                             var file = files[item.id];
                             console.log("Found " + file.name + " at " + (path ? path : "/"));
-                            callback();
+                            callback(false);
                             root.addFile(path, new Croissant.File(item.id, file.name, file.size));
                         }
                     });
@@ -336,7 +337,7 @@ var auth;
 })(auth || (auth = {}));
 var browse;
 (function (browse) {
-    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.path.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div id="tracklist">				<div id="tracklist-album-detail">					<div id="tracklist-album-art">						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">					</div>					<div id="tracklist-album-title">						Adele_21					</div>					<div id="tracklist-album-options">						⊕⊕					</div>				</div>				<div id="tracklist-album-data">					<div>Tracks</div>					<ul id="tracklist-tracks">						<li ng-repeat="track in vm.tracks">{{track}}</li>					</ul>				</div>			</div>		</div>	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
+    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.path.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div id="tracklist">				<div id="tracklist-album-detail">					<div id="tracklist-album-art">						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">					</div>					<div id="tracklist-album-title">						Adele_21					</div>					<div id="tracklist-album-options">						⊕⊕					</div>				</div>				<div id="tracklist-album-data">					<div>Tracks</div>					<ul id="tracklist-tracks">						<li ng-repeat="track in vm.tracks">{{track}}</li>					</ul>				</div>			</div>		</div>	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
 })(browse || (browse = {}));
 var main;
 (function (main) {
@@ -384,6 +385,8 @@ var Croissant;
             this.safeApply = safeApply;
             this.tracks = ['01 Rolling in the Deep', '02 Rumor has it', '03 Tuming Tables', '04 Dont You Remember', '05 Set Fire to the Rain', '06 He Wont Go', '07 Take It All', '08 Ill Be Waiting', '09 One and Only', '10 Lovesong', '11 Someone Like You'];
             this.children = [new Croissant.Folder(null, "loading...")];
+            this.loaded = false;
+            this.completed = false;
             $scope.vm = this;
             this.root = Croissant.Drive.getRoot();
             this.select(Croissant.Drive.ROOT);
@@ -404,31 +407,40 @@ var Croissant;
         BrowseController.prototype.init = function () {
             console.log("loading...");
             var self = this;
-            Croissant.Drive.loadAllFiles(function () {
-                self.select(Croissant.Drive.ROOT);
+            Croissant.Drive.loadAllFiles(function (completed) {
+                self.completed = completed;
+                if (!self.loaded || (self.children.length === 1 && self.children[0].id === null)) {
+                    self.select(Croissant.Drive.ROOT, !completed);
+                }
                 self.$scope.$apply();
             });
         };
 
-        BrowseController.prototype.select = function (id) {
+        BrowseController.prototype.select = function (id, loading) {
+            if (typeof loading === "undefined") { loading = false; }
             var folder = Croissant.Drive.getFolder(id);
 
             if (!folder) {
                 return;
             }
 
+            this.loaded = true;
+
             this.ancestors = [];
-            while (folder.parent != null) {
-                this.ancestors.unshift(folder);
-                folder = folder.parent;
+            for (var f = folder; f.parent != null; f = f.parent) {
+                this.ancestors.unshift(f);
             }
 
-            var c = this.children = [];
+            var c = [];
             angular.forEach(folder.children, function (node) {
                 if (node instanceof Croissant.Folder) {
                     c.push(node);
                 }
             });
+
+            if (!(id === Croissant.Drive.ROOT && !this.completed && c.length === 0)) {
+                this.children = c;
+            }
         };
         return BrowseController;
     })();

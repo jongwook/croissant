@@ -56,7 +56,7 @@ module Croissant {
 			});
 		}
 
-		export function loadAllFiles(callback: () => void) {
+		export function loadAllFiles(callback: (boolean) => void) {
 			var retrieve = request => {
 				request.execute(response => {
 					if (!response || response.error) {
@@ -92,7 +92,7 @@ module Croissant {
 		var loading_filetrees = 0;
 		var loading_subtrees = 0;
 
-		function loadSubTree(folderId: string, path: string, callback: () => void) {
+		function loadSubTree(folderId: string, path: string, callback: (boolean) => void) {
 			loading_subtrees++;
 			var retrieve = (request, folderId, path) => {
 				request.execute((response) => {
@@ -116,7 +116,7 @@ module Croissant {
 						loading_subtrees--;
 						if (loading_filetrees === 0 && loading_subtrees === 0) {
 							console.log("Loading finished");
-							callback();
+							callback(true);
 						}
 					}
 				});
@@ -133,7 +133,7 @@ module Croissant {
 			});
 		}
 
-		function loadFileTree(folderId: string, path: string, callback: () => void) {
+		function loadFileTree(folderId: string, path: string, callback: (boolean) => void) {
 			loading_filetrees++;
 			var retrieve = (request, folderId, path) => {
 				request.execute((response) => {
@@ -145,7 +145,7 @@ module Croissant {
 						if (files[item.id]) {
 							var file = files[item.id];
 							console.log("Found " + file.name + " at " + (path ? path : "/"));
-							callback();
+							callback(false);
 							root.addFile(path, new File(item.id, file.name, file.size));
 						}
 					});

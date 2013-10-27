@@ -57,6 +57,7 @@ module Croissant {
 
 				if (!this.children[name]) {
 					this.children[name] = new Folder(null, name);
+					this.children[name].parent = this;
 				}
 
 				if (this.children[name] instanceof Folder) {
