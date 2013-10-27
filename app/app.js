@@ -48,10 +48,12 @@ var Croissant;
 
     var File = (function (_super) {
         __extends(File, _super);
-        function File(id, name, size, parent) {
+        function File(id, name, size, url, parent) {
+            if (typeof url === "undefined") { url = null; }
             if (typeof parent === "undefined") { parent = null; }
             _super.call(this, id, name);
             this.size = size;
+            this.url = url;
             this.parent = parent;
         }
         return File;
@@ -195,7 +197,7 @@ var Croissant;
                         }).length;
                     });
                     angular.forEach(items, function (item) {
-                        files[item.id] = new Croissant.File(item.id, item.title, item.fileSize);
+                        files[item.id] = new Croissant.File(item.id, item.title, item.fileSize, item.downloadUrl);
                     });
                     if (response.nextPageToken) {
                         request = gapi.client.drive.files.list({
@@ -275,7 +277,7 @@ var Croissant;
                             var file = files[item.id];
                             console.log("Found " + file.name + " at " + (path ? path : "/"));
                             callback(false);
-                            root.addFile(path, new Croissant.File(item.id, file.name, file.size));
+                            root.addFile(path, file);
                         }
                     });
                     if (response.nextPageToken) {
@@ -330,13 +332,104 @@ var Croissant;
     })(Croissant.Drive || (Croissant.Drive = {}));
     var Drive = Croissant.Drive;
 })(Croissant || (Croissant = {}));
+var Croissant;
+(function (Croissant) {
+    Croissant.croissant.factory("$player", function () {
+        var player = document.createElement("audio");
+        var context = new webkitAudioContext();
+        var $player = $(player);
+        $player.bind({
+            play: function () {
+                console.log("onplay");
+            },
+            pause: function () {
+                console.log("onpause");
+            },
+            error: function (err) {
+                console.log("onerrror", err);
+            },
+            timeupdate: function () {
+                console.log("ontimeupdate");
+            },
+            progress: function () {
+                console.log("onprogress");
+            },
+            ended: function () {
+                console.log("onended");
+            }
+        });
+
+        document.body.appendChild(player);
+
+        return {
+            play: function (data) {
+                console.log("decoding : " + typeof data);
+                context.decodeAudioData(data, function (buffer) {
+                    console.log("Decoded to : " + typeof buffer);
+                    var audioSource = context.createBufferSource();
+                    audioSource.connect(context.destination);
+
+                    audioSource.buffer = buffer;
+                    audioSource.noteOn(0);
+                    audioSource.playbackRate.value = 1;
+                });
+            }
+        };
+    });
+
+    var PlayerController = (function () {
+        function PlayerController($scope, $player) {
+            this.$scope = $scope;
+            this.$player = $player;
+            this.text = "hello";
+            this.playlist = "Basic Playlist";
+            this.album = "";
+            this.track = "";
+            console.log("PlayerController constructed");
+            $scope.vm = this;
+
+            var self = this;
+            $scope.$on("play", function (event, args) {
+                return self.play(args);
+            });
+        }
+        PlayerController.prototype.play = function (file) {
+            console.log("Playing " + file.name);
+
+            var self = this;
+            if (file.url) {
+                self.album = file.parent ? file.parent.name : file.name;
+                self.track = file.name;
+
+                var accessToken = gapi.auth.getToken().access_token;
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', file.url, true);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+                xhr.responseType = "arraybuffer";
+                xhr.onload = function () {
+                    console.log("Got it : " + typeof (xhr.response));
+                    self.$player.play(xhr.response);
+                };
+                xhr.onerror = function () {
+                    console.error("Error while downloading music");
+                };
+                console.log("Downloading " + file.url + " ...");
+                xhr.send();
+            } else {
+                console.warn("Tried to download invalid url : " + file.name);
+            }
+        };
+        return PlayerController;
+    })();
+    Croissant.PlayerController = PlayerController;
+})(Croissant || (Croissant = {}));
 var auth;
 (function (auth) {
     auth.html = '<div id="auth-content">	<div id="auth-logo">		&#67;roissant	</div>	<div id="auth-login">		<a ng-click="vm.auth()">Sign in with Google</a>	</div></div>';
 })(auth || (auth = {}));
 var browse;
 (function (browse) {
-    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			<button id="player-prev"></button>			<button id="player-play"></button>			<button id="player-pause"></button>			<button id="player-ff"></button>			<div id="player-album-art"></div>			<div id="player-data">				<p id="player-playlist">Basic Playlist</p>				<p id="player-artist">Adele_Turning Table</p>				<p id="player-track">05 Set Fire to the Rain</p>				<p id="player-slider">00:32 --- </p>			</div>			<button id="player-repeat-off" class="player-repeat"></button>			<button id="player-repeat-one" class="player-repeat"></button>			<button id="player-repeat-all" class="player-repeat"></button>			<button id="player-shuffle-off" class="player-shuffle"></button>			<button id="player-shuffle-on" class="player-shuffle"></button>			<button id="player-mute"></button>			<div id="player-volume-slider"></div>		</div>	</div></div>';
+    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks" ng-click="vm.play(track)">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			<button id="player-prev"></button>			<button id="player-play"></button>			<button id="player-pause"></button>			<button id="player-ff"></button>			<div id="player-album-art"></div>			<div id="player-data">				<p id="player-playlist">{{vm.playlist}}</p>				<p id="player-album">{{vm.album}}</p>				<p id="player-track">{{vm.track}}</p>				<p id="player-slider">{{elapsed}} <span id="player-slider-element"></span> {{length}}</p>			</div>			<button id="player-repeat-off" class="player-repeat"></button>			<button id="player-repeat-one" class="player-repeat"></button>			<button id="player-repeat-all" class="player-repeat"></button>			<button id="player-shuffle-off" class="player-shuffle"></button>			<button id="player-shuffle-on" class="player-shuffle"></button>			<button id="player-mute"></button>			<div id="player-volume-slider"></div>		</div>	</div></div>';
 })(browse || (browse = {}));
 var main;
 (function (main) {
@@ -378,10 +471,11 @@ var Croissant;
 var Croissant;
 (function (Croissant) {
     var BrowseController = (function () {
-        function BrowseController($scope, $location, safeApply) {
+        function BrowseController($scope, $location, safeApply, $player) {
             this.$scope = $scope;
             this.$location = $location;
             this.safeApply = safeApply;
+            this.$player = $player;
             this.tracks = ['01 Rolling in the Deep', '02 Rumor has it', '03 Tuming Tables', '04 Dont You Remember', '05 Set Fire to the Rain', '06 He Wont Go', '07 Take It All', '08 Ill Be Waiting', '09 One and Only', '10 Lovesong', '11 Someone Like You'];
             this.children = [new Croissant.Folder(null, "loading...")];
             this.albums = {};
@@ -477,6 +571,10 @@ var Croissant;
                 }
             });
         };
+
+        BrowseController.prototype.play = function (file) {
+            this.$scope.$broadcast("play", file);
+        };
         return BrowseController;
     })();
     Croissant.BrowseController = BrowseController;
@@ -503,50 +601,6 @@ var Croissant;
         return MainController;
     })();
     Croissant.MainController = MainController;
-})(Croissant || (Croissant = {}));
-var Croissant;
-(function (Croissant) {
-    Croissant.croissant.factory("$player", function () {
-        var player = document.createElement("audio");
-
-        $(player).bind({
-            play: function () {
-                console.log("onplay");
-            },
-            pause: function () {
-                console.log("onpause");
-            },
-            error: function (err) {
-                console.log("onerrror : " + err);
-            },
-            timeupdate: function () {
-                console.log("ontimeupdate");
-            },
-            progress: function () {
-                console.log("onprogress");
-            },
-            ended: function () {
-                console.log("onended");
-            }
-        });
-
-        document.body.appendChild(player);
-
-        return {
-            foo: "bar"
-        };
-    });
-
-    var PlayerController = (function () {
-        function PlayerController($scope, $player) {
-            this.text = "hello";
-            console.log("PlayerController constructed");
-            $scope.vm = this;
-            this.text = $player.foo;
-        }
-        return PlayerController;
-    })();
-    Croissant.PlayerController = PlayerController;
 })(Croissant || (Croissant = {}));
 var Croissant;
 (function (Croissant) {

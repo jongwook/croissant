@@ -40,7 +40,7 @@
 				<div class="tracklist-album-data">
 					<div>Tracks</div>
 					<ul class="tracklist-tracks">
-						<li ng-repeat="track in tracks">{{track.name}}</li>
+						<li ng-repeat="track in tracks" ng-click="vm.play(track)">{{track.name}}</li>
 					</ul>
 				</div>
 				<div class="clear"></div>
@@ -56,10 +56,10 @@
 			<button id="player-ff"></button>
 			<div id="player-album-art"></div>
 			<div id="player-data">
-				<p id="player-playlist">Basic Playlist</p>
-				<p id="player-artist">Adele_Turning Table</p>
-				<p id="player-track">05 Set Fire to the Rain</p>
-				<p id="player-slider">00:32 --- 04:02 </p>
+				<p id="player-playlist">{{vm.playlist}}</p>
+				<p id="player-album">{{vm.album}}</p>
+				<p id="player-track">{{vm.track}}</p>
+				<p id="player-slider">{{elapsed}} <span id="player-slider-element"></span> {{length}}</p>
 			</div>
 			<button id="player-repeat-off" class="player-repeat"></button>
 			<button id="player-repeat-one" class="player-repeat"></button>

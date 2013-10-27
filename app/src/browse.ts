@@ -9,7 +9,7 @@ module Croissant {
 		children: Folder[] = [new Folder(null, "loading...")];
 		albums: {[album: string]: File[]} = {};
 
-		constructor(private $scope, private $location, private safeApply) {
+		constructor(private $scope, private $location, private safeApply, private $player) {
 			$scope.vm = this;
 
 			this.root = Drive.getRoot();
@@ -99,6 +99,10 @@ module Croissant {
 					self.addFiles(<Folder>node, albums);
 				}
 			});
+		}
+
+		play(file: File) {
+			this.$scope.$broadcast("play", file);
 		}
 	}
 }

@@ -8,7 +8,7 @@ module Croissant {
 	}
 
 	export class File extends Node {
-		constructor(id: string, name: string, public size: number, public parent: Folder = null) {
+		constructor(id: string, name: string, public size: number, public url: string = null, public parent: Folder = null) {
 			super(id, name);
 		}
 	}

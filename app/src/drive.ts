@@ -65,7 +65,7 @@ module Croissant {
 					var items = response.items.filter(item => extensions.filter(ext => item.title.match(ext)).length);
 					angular.forEach(items, item => {
 						//console.log(item.mimeType + ": " + item.title);
-						files[item.id] = new File(item.id, item.title, item.fileSize);
+						files[item.id] = new File(item.id, item.title, item.fileSize, item.downloadUrl);
 					})
 					if (response.nextPageToken) {
 						request = gapi.client.drive.files.list({
@@ -145,7 +145,7 @@ module Croissant {
 							var file = files[item.id];
 							console.log("Found " + file.name + " at " + (path ? path : "/"));
 							callback(false);
-							root.addFile(path, new File(item.id, file.name, file.size));
+							root.addFile(path, file);
 						}
 					});
 					if (response.nextPageToken) {
