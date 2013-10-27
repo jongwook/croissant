@@ -1,1 +1,1 @@
-module main { export var html =  '<div id="header">	<div id="header-content">		<div id="header-logo">			&#67;roissant		</div>	</div></div>' } 
+module main { export var html =  '<div id="header">	<div id="header-content">		<div id="header-logo">			&#67;roissant		</div>		<div id="header-search">			<input type="text" placeholder="Search by name, artist, etc.">		</div>	</div></div>' } 

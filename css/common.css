@@ -8,8 +8,10 @@ html, body {
 	-webkit-font-smoothing: antialiased;
 }
 
-div {
+div, input {
 	box-sizing: border-box;
+	border: 0;
+	outline: none;
 }
 
 a {

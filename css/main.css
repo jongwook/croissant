@@ -1,6 +1,7 @@
 @import url(common.css);
 
 #header {
+	position: absolute;
 	height: 50px;
 	width: 100%;
 	background: #ecce74;
@@ -12,7 +13,8 @@
 }
 
 #header-logo {
-	width: 100px;
+	float: left;
+	width: 150px;
 	background-image: url(../images/logo.svg);
 	background-repeat: no-repeat;
 	background-size: 32px 32px;
@@ -22,4 +24,22 @@
 	font-weight: 800;
 }
 
+#header-search {
+	float: left;
+}
 
+::-webkit-input-placeholder {
+	color: #56462a;
+}
+
+#header-search input {
+	margin: 8px 0 8px 0;
+	padding: 8px;
+	width: 200px;
+	height: 34px;
+	background-color: #c0a34b;
+	background-image: url(../images/search.svg);
+	background-repeat: no-repeat;
+	background-position: 175px center;
+	background-size: 20px 20px;
+}
