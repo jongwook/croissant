@@ -3,7 +3,7 @@
 #header {
 	height: 50px;
 	width: 100%;
-	background: #ebc85e;
+	background: #ecce74;
 }
 
 #header-content {
@@ -19,6 +19,7 @@
 	background-position: 9px 9px;
 	line-height: 50px;
 	padding-left: 50px;
+	font-weight: 800;
 }
 
 
