@@ -17,5 +17,34 @@
 }
 
 #player {
-	width: 960px;
+	width: 800px;
+	margin: auto;
+}
+
+#player button {
+	background-color: rgba(0,0,0,0);
+}
+
+#player #prev {
+	width: 60px;
+	height: 60px;
+	background-image: url(../images/prev.png);
+}
+
+#player #play {
+	width: 75px;
+	height: 75px;
+	background-image: url(../images/play.png);
+}
+
+#player #pause {
+	width: 75px;
+	height: 75px;
+	background-image: url(../images/pause.png);
+}
+
+#player #ff {
+	width: 60px;
+	height: 60px;
+	background-image: url(../images/ff.png);
 }
