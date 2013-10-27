@@ -1,1 +1,1 @@
-module main { export var html =  '{{\'Croissant\' + \' \' + \'main\'}}!{{text}}<a href="#/auth">auth</a>' } 
+module main { export var html =  '' } 

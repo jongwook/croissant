@@ -1,20 +1,39 @@
-var auth;
+﻿var auth;
 (function (auth) {
     auth.html = '<link rel="stylesheet" type="text/css" href="css/auth.css"><div id="auth-content">	<div id="auth-logo">		&#67;roissant	</div>	<div id="auth-login">		<a ng-click="vm.auth()">Sign in with Google</a>	</div></div>';
 })(auth || (auth = {}));
 var main;
 (function (main) {
-    main.html = '{{\'Croissant\' + \' \' + \'main\'}}!{{text}}<a href="#/auth">auth</a>';
+    main.html = '';
 })(main || (main = {}));
 var Croissant;
 (function (Croissant) {
     var AuthController = (function () {
-        function AuthController($scope) {
+        function AuthController($scope, $location, safeApply) {
+            this.$scope = $scope;
+            this.$location = $location;
+            this.safeApply = safeApply;
             this.hi = "hello";
             $scope.vm = this;
+            Croissant.Drive.onload(function () {
+                Croissant.Drive.authorize(true, function () {
+                    console.log("Already logged in");
+                    safeApply($scope, function () {
+                        $location.path("/");
+                    });
+                });
+            });
         }
         AuthController.prototype.auth = function () {
-            console.log("auth");
+            var self = this;
+            Croissant.Drive.authorize(false, function () {
+                console.log("auth successful!");
+                self.safeApply(self.$scope, function () {
+                    self.$location.path("/");
+                });
+            }, function (error) {
+                throw new Error("Could not connect to Google Drive : " + error);
+            });
         };
         return AuthController;
     })();
@@ -43,6 +62,65 @@ var Croissant;
             $rootScope.title = current.$$route.title;
         });
     });
+
+    Croissant.croissant.factory('safeApply', [
+        function ($rootScope) {
+            return function ($scope, fn) {
+                var phase = $scope.$root.$$phase;
+                if (phase == '$apply' || phase == '$digest') {
+                    if (fn) {
+                        $scope.$eval(fn);
+                    }
+                } else {
+                    if (fn) {
+                        $scope.$apply(fn);
+                    } else {
+                        $scope.$apply();
+                    }
+                }
+            };
+        }
+    ]);
+})(Croissant || (Croissant = {}));
+var Croissant;
+(function (Croissant) {
+    (function (Drive) {
+        var CLIENT_ID = "71188979891.apps.googleusercontent.com";
+        var SCOPES = ['https://www.googleapis.com/auth/drive'];
+
+        var callbacks = [];
+        var loaded = false;
+
+        window["Croissant.Drive.load"] = function () {
+            loaded = true;
+            console.log("api loaded : " + gapi);
+
+            angular.forEach(callbacks, function (callback) {
+                callback();
+            });
+        };
+
+        function onload(callback) {
+            if (loaded) {
+                callback();
+            } else {
+                callbacks.push(callback);
+            }
+        }
+        Drive.onload = onload;
+
+        function authorize(immediate, success, failed) {
+            gapi.auth.authorize({ 'client_id': CLIENT_ID, 'scope': SCOPES, 'immediate': immediate }, function (result) {
+                if (result && !result.error) {
+                    success();
+                } else if (failed) {
+                    failed(result ? result.error.toString() : Croissant.toString(result));
+                }
+            });
+        }
+        Drive.authorize = authorize;
+    })(Croissant.Drive || (Croissant.Drive = {}));
+    var Drive = Croissant.Drive;
 })(Croissant || (Croissant = {}));
 var Croissant;
 (function (Croissant) {
@@ -55,11 +133,41 @@ var Croissant;
 var Croissant;
 (function (Croissant) {
     var MainController = (function () {
-        function MainController($scope) {
-            $scope.text = "Hello Moduled";
+        function MainController($scope, $location, safeApply) {
+            var self = this;
+            Croissant.Drive.onload(function () {
+                Croissant.Drive.authorize(true, function () {
+                    console.log("Successfully authorized");
+                    self.init();
+                }, function (error) {
+                    console.log("Not authorized; moving to /auth");
+                    safeApply($scope, function () {
+                        $location.path("/auth");
+                    });
+                });
+            });
         }
+        MainController.prototype.init = function () {
+            console.log("loading...");
+        };
         return MainController;
     })();
     Croissant.MainController = MainController;
+})(Croissant || (Croissant = {}));
+var Croissant;
+(function (Croissant) {
+    function toString(object) {
+        if (object === null)
+            return "(null)";
+        switch (typeof object) {
+            case "undefined":
+                return "(undefined)";
+            case "string":
+                return object;
+            default:
+                return object.toString();
+        }
+    }
+    Croissant.toString = toString;
 })(Croissant || (Croissant = {}));
 //# sourceMappingURL=app.js.map
