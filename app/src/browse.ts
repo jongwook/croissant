@@ -5,9 +5,12 @@ module Croissant {
 		root: Folder;
 		selected: Folder;
 
+		keyword: string;
 		ancestors: Folder[];
 		children: Folder[] = [new Folder(null, "loading...")];
 		albums: {[album: string]: File[]} = {};
+
+		emptyMessage = 'Searching Google Drive for audio files. Please wait ...';
 
 		constructor(private $scope, private $location, private safeApply, private $player) {
 			$scope.vm = this;
@@ -37,7 +40,12 @@ module Croissant {
 			console.log("loading...");
 			var self = this;
 			Drive.loadAllFiles((completed) => {
+				if (completed) {
+					self.emptyMessage = 'Could not find any mp3 files. Try browsing to other folders or uploading some via Google Drive';
+				}
+
 				self.completed = completed;
+
 				if (!self.loaded || (self.children.length === 1 && self.children[0].id === null)) {
 					self.select(Drive.ROOT, !completed);
 				}
@@ -103,6 +111,10 @@ module Croissant {
 
 		play(file: File) {
 			this.$scope.$broadcast("play", file);
+		}
+
+		empty() {
+			return Object.keys(this.albums).length == 0;
 		}
 	}
 }

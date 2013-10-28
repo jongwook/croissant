@@ -415,7 +415,7 @@ var auth;
 })(auth || (auth = {}));
 var browse;
 (function (browse) {
-    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks" ng-click="vm.play(track)">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			<button id="player-prev"></button>			<button id="player-play"></button>			<button id="player-pause"></button>			<button id="player-ff"></button>			<div id="player-album-art"></div>			<div id="player-data">				<p id="player-playlist">{{vm.playlist}}</p>				<p id="player-album">{{vm.album}}</p>				<p id="player-track">{{vm.track}}</p>				<p id="player-slider">{{vm.status}}</p>			</div>			<button id="player-repeat-off" class="player-repeat"></button>			<button id="player-repeat-one" class="player-repeat"></button>			<button id="player-repeat-all" class="player-repeat"></button>			<button id="player-shuffle-off" class="player-shuffle"></button>			<button id="player-shuffle-on" class="player-shuffle"></button>			<button id="player-mute"></button>			<div id="player-volume-slider"></div>		</div>	</div></div>';
+    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc." ng-model="vm.keyword">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks" ng-click="vm.play(track)">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>			<div ng-show="vm.empty()" style="text-align: center; margin-top: 20px; font-size: 10pt;">{{vm.emptyMessage}}</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			<button id="player-prev"></button>			<button id="player-play"></button>			<button id="player-pause"></button>			<button id="player-ff"></button>			<div id="player-album-art"></div>			<div id="player-data">				<p id="player-playlist">{{vm.playlist}}</p>				<p id="player-album">{{vm.album}}</p>				<p id="player-track">{{vm.track}}</p>				<p id="player-slider">{{vm.status}}</p>			</div>			<button id="player-repeat-off" class="player-repeat"></button>			<button id="player-repeat-one" class="player-repeat"></button>			<button id="player-repeat-all" class="player-repeat"></button>			<button id="player-shuffle-off" class="player-shuffle"></button>			<button id="player-shuffle-on" class="player-shuffle"></button>			<button id="player-mute"></button>			<div id="player-volume-slider"></div>		</div>	</div></div>';
 })(browse || (browse = {}));
 var main;
 (function (main) {
@@ -465,6 +465,7 @@ var Croissant;
             this.tracks = ['01 Rolling in the Deep', '02 Rumor has it', '03 Tuming Tables', '04 Dont You Remember', '05 Set Fire to the Rain', '06 He Wont Go', '07 Take It All', '08 Ill Be Waiting', '09 One and Only', '10 Lovesong', '11 Someone Like You'];
             this.children = [new Croissant.Folder(null, "loading...")];
             this.albums = {};
+            this.emptyMessage = 'Searching Google Drive for audio files. Please wait ...';
             this.loaded = false;
             this.completed = false;
             $scope.vm = this;
@@ -491,7 +492,12 @@ var Croissant;
             console.log("loading...");
             var self = this;
             Croissant.Drive.loadAllFiles(function (completed) {
+                if (completed) {
+                    self.emptyMessage = 'Could not find any mp3 files. Try browsing to other folders or uploading some via Google Drive';
+                }
+
                 self.completed = completed;
+
                 if (!self.loaded || (self.children.length === 1 && self.children[0].id === null)) {
                     self.select(Croissant.Drive.ROOT, !completed);
                 }
@@ -560,6 +566,10 @@ var Croissant;
 
         BrowseController.prototype.play = function (file) {
             this.$scope.$broadcast("play", file);
+        };
+
+        BrowseController.prototype.empty = function () {
+            return Object.keys(this.albums).length == 0;
         };
         return BrowseController;
     })();

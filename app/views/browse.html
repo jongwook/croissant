@@ -5,7 +5,7 @@
 				&#67;roissant
 			</div>
 			<div id="header-search">
-				<input type="text" placeholder="Search by name, artist, etc.">
+				<input type="text" placeholder="Search by name, artist, etc." ng-model="vm.keyword">
 			</div>
 			<div id="header-tabs">
 				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>
@@ -45,6 +45,7 @@
 				</div>
 				<div class="clear"></div>
 			</div>
+			<div ng-show="vm.empty()" style="text-align: center; margin-top: 20px; font-size: 10pt;">{{vm.emptyMessage}}</div>
 		</div>
 	</div>
 
