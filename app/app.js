@@ -207,8 +207,13 @@ var Croissant;
                         });
                         retrieve(request);
                     } else {
-                        console.log("File loading complete; loading tree");
-                        loadFileTree(Drive.ROOT, "", callback);
+                        if (Object.keys(files).length === 0) {
+                            console.log("No files found; aborting...");
+                            callback(true);
+                        } else {
+                            console.log("File loading complete; loading tree");
+                            loadFileTree(Drive.ROOT, "", callback);
+                        }
                     }
                 });
             };
