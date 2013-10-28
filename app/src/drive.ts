@@ -62,7 +62,7 @@ module Croissant {
 						console.error(response.error);
 						throw new Error("loadAllFiles error");
 					}
-					var items = response.items.filter(item => extensions.filter(ext => item.title.match(ext)).length);
+					var items = response.items ? response.items.filter(item => extensions.filter(ext => item.title.match(ext)).length) : [];
 					angular.forEach(items, item => {
 						//console.log(item.mimeType + ": " + item.title);
 						files[item.id] = new File(item.id, item.title, item.fileSize, item.downloadUrl);

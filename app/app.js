@@ -191,11 +191,11 @@ var Croissant;
                         console.error(response.error);
                         throw new Error("loadAllFiles error");
                     }
-                    var items = response.items.filter(function (item) {
+                    var items = response.items ? response.items.filter(function (item) {
                         return extensions.filter(function (ext) {
                             return item.title.match(ext);
                         }).length;
-                    });
+                    }) : [];
                     angular.forEach(items, function (item) {
                         files[item.id] = new Croissant.File(item.id, item.title, item.fileSize, item.downloadUrl);
                     });
