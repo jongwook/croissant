@@ -29,9 +29,8 @@ module Croissant {
 			root = new Folder(ROOT, "My Drive");
 			folders[ROOT] = root;
 
-			var self = this;
 			gapi.client.load('drive', 'v2', () => {
-				self.loaded = true;
+				loaded = true;
 				angular.forEach(callbacks, function(callback) {
 					callback();
 				});
@@ -63,10 +62,10 @@ module Croissant {
 						console.error(response.error);
 						throw new Error("loadAllFiles error");
 					}
-					var items = response.items.filter(item => extensions.filter(ext => item.title.match(ext)).length > 0);
+					var items = response.items ? response.items.filter(item => extensions.filter(ext => item.title.match(ext)).length > 0) : [];
 					angular.forEach(items, item => {
 						//console.log(item.mimeType + ": " + item.title);
-						files[item.id] = new File(item.id, item.title, item.fileSize);
+						files[item.id] = new File(item.id, item.title, item.fileSize, item.downloadUrl);
 					})
 					if (response.nextPageToken) {
 						request = gapi.client.drive.files.list({
@@ -76,8 +75,13 @@ module Croissant {
 						});
 						retrieve(request);
 					} else {
-						console.log("File loading complete; loading tree");
-						loadFileTree(ROOT, "", callback);
+						if (Object.keys(files).length === 0) {
+							console.log("No files found; aborting...");
+							callback(true);
+						} else {
+							console.log("File loading complete; loading tree");
+							loadFileTree(ROOT, "", callback);
+						}
 					}
 				});
 			}
@@ -146,7 +150,7 @@ module Croissant {
 							var file = files[item.id];
 							console.log("Found " + file.name + " at " + (path ? path : "/"));
 							callback(false);
-							root.addFile(path, new File(item.id, file.name, file.size));
+							root.addFile(path, file);
 						}
 					});
 					if (response.nextPageToken) {

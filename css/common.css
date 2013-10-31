@@ -35,3 +35,7 @@ a, a:visited, a:hover, a:active {
 	color: inherit;
 	cursor: pointer;
 }
+
+.clear {
+	clear: both;
+}

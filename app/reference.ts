@@ -6,6 +6,8 @@
 /// <reference path="src/library.ts" />
 /// <reference path="src/drive.ts" />
 
+/// <reference path="src/player.ts" />
+
 //grunt-start
 /// <reference path="views/auth.html.ts" />// generated
 /// <reference path="views/browse.html.ts" />// generated

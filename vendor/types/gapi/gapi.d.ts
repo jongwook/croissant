@@ -40,6 +40,8 @@ declare module gapi.auth {
 		 */
 			scope?: any[]
 	}, callback: (token: Token) => any): void;
+
+	export function getToken(): Token;
 }
 
 

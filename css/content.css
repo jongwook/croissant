@@ -13,69 +13,66 @@
 
 }
 
-#tracklist {
+.tracklist {
 	width: 100%;
 	background-color: #ebd182;
 	border: 2px solid #ece6d1;
-
-
 }
 
-
-#tracklist-album-detail {
+.tracklist-album-detail {
 	float: left;
 	width: 150px;
 	border: 15px solid #ebd182;
 }
 
-#tracklist-album-art img {
+.tracklist-album-art img {
 	width: 120px;
 	height: 120px;
 }
 
-#tracklist-album-title {
+.tracklist-album-title {
 	font-weight: 800;
 }
 
-#tracklist-album-options {
+.tracklist-album-options {
 	font-size: 24pt;
 	font-weight: bold;
 	color: #ece6d1;
 }
 
-#tracklist-tracks li {
+.tracklist-tracks li {
 	list-style: none;
 	height: 20px;
 	line-height: 20px;
 }
 
-#tracklist-album-data {
+.tracklist-album-data {
 	padding-left: 150px;
 	font-size: 10pt;
 	border: 15px solid #ebd182;
 	border-left-width: 0;
 }
 
-#tracklist-album-data div {
+.tracklist-album-data div {
 	height: 20px;
 	line-height: 20px;
 	padding-left: 5px;
 }
 
-#tracklist-album-data ul {
+.tracklist-album-data ul {
 	padding: 0;
 	margin: 0;
 }
 
-#tracklist-album-data li {
+.tracklist-album-data li {
 	padding-left: 5px;
 }
 
-#tracklist-album-data li:nth-child(odd) {
+.tracklist-album-data li:nth-child(odd) {
 	background-color: #cdb362;
 }
 
-#tracklist-album-data li:after {
+.tracklist-album-data li:after {
 	float: right;
 	content: "⊕⊕";
 	font-size: 12pt;

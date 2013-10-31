@@ -48,10 +48,12 @@ var Croissant;
 
     var File = (function (_super) {
         __extends(File, _super);
-        function File(id, name, size, parent) {
+        function File(id, name, size, url, parent) {
+            if (typeof url === "undefined") { url = null; }
             if (typeof parent === "undefined") { parent = null; }
             _super.call(this, id, name);
             this.size = size;
+            this.url = url;
             this.parent = parent;
         }
         return File;
@@ -155,9 +157,8 @@ var Croissant;
             root = new Croissant.Folder(Drive.ROOT, "My Drive");
             folders[Drive.ROOT] = root;
 
-            var self = this;
             gapi.client.load('drive', 'v2', function () {
-                self.loaded = true;
+                loaded = true;
                 angular.forEach(callbacks, function (callback) {
                     callback();
                 });
@@ -191,13 +192,13 @@ var Croissant;
                         console.error(response.error);
                         throw new Error("loadAllFiles error");
                     }
-                    var items = response.items.filter(function (item) {
+                    var items = response.items ? response.items.filter(function (item) {
                         return extensions.filter(function (ext) {
                             return item.title.match(ext);
                         }).length > 0;
-                    });
+                    }) : [];
                     angular.forEach(items, function (item) {
-                        files[item.id] = new Croissant.File(item.id, item.title, item.fileSize);
+                        files[item.id] = new Croissant.File(item.id, item.title, item.fileSize, item.downloadUrl);
                     });
                     if (response.nextPageToken) {
                         request = gapi.client.drive.files.list({
@@ -207,8 +208,13 @@ var Croissant;
                         });
                         retrieve(request);
                     } else {
-                        console.log("File loading complete; loading tree");
-                        loadFileTree(Drive.ROOT, "", callback);
+                        if (Object.keys(files).length === 0) {
+                            console.log("No files found; aborting...");
+                            callback(true);
+                        } else {
+                            console.log("File loading complete; loading tree");
+                            loadFileTree(Drive.ROOT, "", callback);
+                        }
                     }
                 });
             };
@@ -277,7 +283,7 @@ var Croissant;
                             var file = files[item.id];
                             console.log("Found " + file.name + " at " + (path ? path : "/"));
                             callback(false);
-                            root.addFile(path, new Croissant.File(item.id, file.name, file.size));
+                            root.addFile(path, file);
                         }
                     });
                     if (response.nextPageToken) {
@@ -332,13 +338,90 @@ var Croissant;
     })(Croissant.Drive || (Croissant.Drive = {}));
     var Drive = Croissant.Drive;
 })(Croissant || (Croissant = {}));
+var Croissant;
+(function (Croissant) {
+    Croissant.croissant.factory("$player", function () {
+        var context = new webkitAudioContext();
+        var audioSource = context.createBufferSource();
+        audioSource.connect(context.destination);
+
+        return {
+            play: function (data, callback) {
+                callback("Decoding...");
+                context.decodeAudioData(data, function (buffer) {
+                    callback("Decoding complete!");
+
+                    audioSource.buffer = buffer;
+                    audioSource.noteOn(0);
+                    audioSource.playbackRate.value = 1;
+
+                    setTimeout(function () {
+                        return callback("");
+                    }, 1000);
+                });
+            }
+        };
+    });
+
+    var PlayerController = (function () {
+        function PlayerController($scope, safeApply, $player) {
+            this.$scope = $scope;
+            this.safeApply = safeApply;
+            this.$player = $player;
+            this.text = "hello";
+            this.playlist = "Basic Playlist";
+            this.album = "";
+            this.track = "";
+            this.status = "";
+            console.log("PlayerController constructed");
+            $scope.vm = this;
+
+            var self = this;
+            $scope.$on("play", function (event, args) {
+                return self.play(args);
+            });
+        }
+        PlayerController.prototype.play = function (file) {
+            console.log("Playing " + file.name);
+
+            var self = this;
+            if (file.url) {
+                self.album = file.parent ? file.parent.name : file.name;
+                self.track = file.name;
+
+                var accessToken = gapi.auth.getToken().access_token;
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', file.url, true);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+                xhr.responseType = "arraybuffer";
+                xhr.onload = function () {
+                    self.status = "Buffering complete";
+                    self.$player.play(xhr.response, function (status) {
+                        return self.safeApply(self.$scope, function () {
+                            return self.status = status;
+                        });
+                    });
+                };
+                xhr.onerror = function () {
+                    console.error("Error while downloading music");
+                };
+                self.status = "Buffering...";
+                xhr.send();
+            } else {
+                console.warn("Tried to download invalid url : " + file.name);
+            }
+        };
+        return PlayerController;
+    })();
+    Croissant.PlayerController = PlayerController;
+})(Croissant || (Croissant = {}));
 var auth;
 (function (auth) {
     auth.html = '<div id="auth-content">	<div id="auth-logo">		&#67;roissant	</div>	<div id="auth-login">		<a ng-click="vm.auth()">Sign in with Google</a>	</div></div>';
 })(auth || (auth = {}));
 var browse;
 (function (browse) {
-    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc.">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.path.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div id="tracklist">				<div id="tracklist-album-detail">					<div id="tracklist-album-art">						<img src="http://www.muumuse.com/wp-content/uploads/2011/01/adele-21.jpeg">					</div>					<div id="tracklist-album-title">						Adele_21					</div>					<div id="tracklist-album-options">						⊕⊕					</div>				</div>				<div id="tracklist-album-data">					<div>Tracks</div>					<ul id="tracklist-tracks">						<li ng-repeat="track in vm.tracks">{{track}}</li>					</ul>				</div>			</div>		</div>	</div>	<div id="player-bar">		<div id="player">		</div>	</div></div>';
+    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc." ng-model="vm.keyword">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks" ng-click="vm.play(track)">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>			<div ng-show="vm.empty()" style="text-align: center; margin-top: 20px; font-size: 10pt;">{{vm.emptyMessage}}</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			<button id="player-prev"></button>			<button id="player-play"></button>			<button id="player-pause"></button>			<button id="player-ff"></button>			<div id="player-album-art"></div>			<div id="player-data">				<p id="player-playlist">{{vm.playlist}}</p>				<p id="player-album">{{vm.album}}</p>				<p id="player-track">{{vm.track}}</p>				<p id="player-slider">{{vm.status}}</p>			</div>			<button id="player-repeat-off" class="player-repeat"></button>			<button id="player-repeat-one" class="player-repeat"></button>			<button id="player-repeat-all" class="player-repeat"></button>			<button id="player-shuffle-off" class="player-shuffle"></button>			<button id="player-shuffle-on" class="player-shuffle"></button>			<button id="player-mute"></button>			<div id="player-volume-slider"></div>		</div>	</div></div>';
 })(browse || (browse = {}));
 var main;
 (function (main) {
@@ -380,23 +463,28 @@ var Croissant;
 var Croissant;
 (function (Croissant) {
     var BrowseController = (function () {
-        function BrowseController($scope, $location, safeApply) {
+        function BrowseController($scope, $location, safeApply, $player) {
             this.$scope = $scope;
             this.$location = $location;
             this.safeApply = safeApply;
+            this.$player = $player;
             this.tracks = ['01 Rolling in the Deep', '02 Rumor has it', '03 Tuming Tables', '04 Dont You Remember', '05 Set Fire to the Rain', '06 He Wont Go', '07 Take It All', '08 Ill Be Waiting', '09 One and Only', '10 Lovesong', '11 Someone Like You'];
             this.children = [new Croissant.Folder(null, "loading...")];
+            this.albums = {};
+            this.emptyMessage = 'Searching Google Drive for audio files. Please wait ...';
             this.loaded = false;
             this.completed = false;
             $scope.vm = this;
+
             this.root = Croissant.Drive.getRoot();
             this.select(Croissant.Drive.ROOT);
 
+            var self = this;
             Croissant.Drive.onload(function () {
                 console.log("Checking if logged in...");
                 Croissant.Drive.authorize(true, function () {
                     console.log("Successfully authorized");
-                    $scope.vm.init();
+                    self.init();
                 }, function (error) {
                     console.log("Not authorized; moving to /auth");
                     safeApply($scope, function () {
@@ -406,13 +494,24 @@ var Croissant;
             });
         }
         BrowseController.prototype.init = function () {
+            var _this = this;
             console.log("loading...");
             var self = this;
             Croissant.Drive.loadAllFiles(function (completed) {
+                if (completed) {
+                    self.emptyMessage = 'Could not find any mp3 files. Try browsing to other folders or uploading some via Google Drive';
+                }
+
                 self.completed = completed;
+
                 if (!self.loaded || (self.children.length === 1 && self.children[0].id === null)) {
                     self.select(Croissant.Drive.ROOT, !completed);
                 }
+
+                if (self.selected) {
+                    _this.reloadAlbums(self.selected);
+                }
+
                 self.$scope.$apply();
             });
         };
@@ -424,6 +523,8 @@ var Croissant;
             if (!folder) {
                 return;
             }
+
+            this.selected = folder;
 
             this.loaded = true;
 
@@ -442,6 +543,39 @@ var Croissant;
             if (!(id === Croissant.Drive.ROOT && !this.completed && c.length === 0)) {
                 this.children = c;
             }
+
+            this.reloadAlbums(folder);
+        };
+
+        BrowseController.prototype.reloadAlbums = function (folder) {
+            this.albums = {};
+            this.addFiles(folder, this.albums);
+            angular.forEach(this.albums, function (album) {
+                album.sort(function (x, y) {
+                    return x.name > y.name ? 1 : -1;
+                });
+            });
+        };
+
+        BrowseController.prototype.addFiles = function (folder, albums) {
+            var self = this;
+            angular.forEach(folder.children, function (node) {
+                if (node instanceof Croissant.File) {
+                    var name = node.parent.name;
+                    albums[name] = albums[name] || [];
+                    albums[name].push(node);
+                } else if (node instanceof Croissant.Folder) {
+                    self.addFiles(node, albums);
+                }
+            });
+        };
+
+        BrowseController.prototype.play = function (file) {
+            this.$scope.$broadcast("play", file);
+        };
+
+        BrowseController.prototype.empty = function () {
+            return Object.keys(this.albums).length == 0;
         };
         return BrowseController;
     })();

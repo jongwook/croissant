@@ -5,19 +5,25 @@ module Croissant {
 		root: Folder;
 		selected: Folder;
 
+		keyword: string;
 		ancestors: Folder[];
 		children: Folder[] = [new Folder(null, "loading...")];
+		albums: {[album: string]: File[]} = {};
 
-		constructor(private $scope, private $location, private safeApply) {
+		emptyMessage = 'Searching Google Drive for audio files. Please wait ...';
+
+		constructor(private $scope, private $location, private safeApply, private $player) {
 			$scope.vm = this;
+
 			this.root = Drive.getRoot();
 			this.select(Drive.ROOT);
 
+			var self = this;
 			Drive.onload(function() {
 				console.log("Checking if logged in...");
 				Drive.authorize(true, () => {
 					console.log("Successfully authorized");
-					$scope.vm.init();
+					self.init();
 				}, (error: string) => {
 					console.log("Not authorized; moving to /auth");
 					safeApply($scope, () => {
@@ -34,10 +40,20 @@ module Croissant {
 			console.log("loading...");
 			var self = this;
 			Drive.loadAllFiles((completed) => {
+				if (completed) {
+					self.emptyMessage = 'Could not find any mp3 files. Try browsing to other folders or uploading some via Google Drive';
+				}
+
 				self.completed = completed;
+
 				if (!self.loaded || (self.children.length === 1 && self.children[0].id === null)) {
 					self.select(Drive.ROOT, !completed);
 				}
+
+				if (self.selected) {
+					this.reloadAlbums(self.selected);
+				}
+
 				self.$scope.$apply();
 			});
 		}
@@ -48,6 +64,8 @@ module Croissant {
 			if (!folder) {
 				return;
 			}
+
+			this.selected = folder;
 
 			this.loaded = true;
 
@@ -66,6 +84,37 @@ module Croissant {
 			if (!(id === Drive.ROOT && !this.completed && c.length === 0)) {
 				this.children = c;
 			}
+
+			this.reloadAlbums(folder);
+		}
+
+		reloadAlbums(folder: Folder) {
+			this.albums = {};
+			this.addFiles(folder, this.albums);
+			angular.forEach(this.albums, (album) => {
+				album.sort((x, y) => x.name > y.name ? 1 : -1);
+			});
+		}
+
+		addFiles(folder: Folder, albums: {[album: string]: File[]}) {
+			var self = this;
+			angular.forEach(folder.children, (node) => {
+				if (node instanceof File) {
+					var name = node.parent.name;
+					albums[name] = albums[name] || [];
+					albums[name].push(<File>node);
+				} else if (node instanceof Folder) {
+					self.addFiles(<Folder>node, albums);
+				}
+			});
+		}
+
+		play(file: File) {
+			this.$scope.$broadcast("play", file);
+		}
+
+		empty() {
+			return Object.keys(this.albums).length == 0;
 		}
 	}
 }

@@ -2,13 +2,18 @@
 <html ng-app="croissant">
 <head>
 	<title ng-bind="title"></title>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="vendor/nouislider/jquery.nouislider.min.css">
 	<link rel="stylesheet" type="text/css" href="css/all.css">
 </head>
 <body>
 	<ng-view></ng-view>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular-route.js"></script>
+	<script src="vendor/util/string.js"></script>
 	<script src="app/app.js"></script>
 	<script src="https://apis.google.com/js/client.js?onload=Croissant.Drive.load"></script>
+	<script src="vendor/nouislider/jquery.nouislider.min.js"></script>
 </body>
 </html>
