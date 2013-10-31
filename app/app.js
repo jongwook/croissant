@@ -93,6 +93,7 @@ var Croissant;
                     return child.addFolder(components.join("/"), id);
                 } else {
                     console.warn(name + " already exists and not a directory");
+                    return null;
                 }
             }
         };
@@ -193,7 +194,7 @@ var Croissant;
                     var items = response.items.filter(function (item) {
                         return extensions.filter(function (ext) {
                             return item.title.match(ext);
-                        }).length;
+                        }).length > 0;
                     });
                     angular.forEach(items, function (item) {
                         files[item.id] = new Croissant.File(item.id, item.title, item.fileSize);

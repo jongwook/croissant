@@ -13,7 +13,7 @@ module.exports = function (grunt) {
 				html: ["app/**/*.html"],
 				reference: "./app/reference.ts",
 				out: 'app/app.js',
-				watch: 'app'
+				watch: '.'
 			}
 		}
 	});
