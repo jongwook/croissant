@@ -30,6 +30,17 @@
 #include "ppapi/cpp/module.h"
 #include "ppapi/cpp/var.h"
 
+extern "C" {
+#include <libavcodec/avcodec.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/common.h>
+#include <libavutil/imgutils.h>
+#include <libavutil/mathematics.h>
+#include <libavutil/samplefmt.h>
+#include <libavformat/avformat.h>
+#include <libavutil/dict.h>
+}
+
 /// The Instance class.  One of these exists for each instance of your NaCl
 /// module on the web page.  The browser will ask the Module object to create
 /// a new Instance for each occurence of the <embed> tag that has these
@@ -86,6 +97,7 @@ namespace pp {
 /// is one instance per <embed> tag on the page.  This is the main binding
 /// point for your NaCl module with the browser.
 Module* CreateModule() {
+  avcodec_register_all();
   return new HelloTutorialModule();
 }
 }  // namespace pp

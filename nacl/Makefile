@@ -43,10 +43,15 @@ X86_CXX:=$(X86_TC_PATH)/bin/i686-nacl-g++
 ARM_CXX:=$(ARM_TC_PATH)/bin/arm-nacl-g++
 
 CXXFLAGS:=-I$(NACL_SDK_ROOT)/include
-LDFLAGS:=-lppapi_cpp -lppapi
-LDFLAGS_X86_32:=-L$(NACL_SDK_ROOT)/lib/newlib_x86_32/Debug
-LDFLAGS_X86_64:=-L$(NACL_SDK_ROOT)/lib/newlib_x86_64/Debug
-LDFLAGS_ARM:=-L$(NACL_SDK_ROOT)/lib/newlib_arm/Debug
+CXXFLAGS += -I../../naclports/out/repository/libav-9.6
+
+LDFLAGS:= -lppapi_cpp -lppapi
+LDFLAGS+= -lavformat -lavcodec -lavutil -lm
+
+LDFLAGS_X86_32 := -L$(NACL_SDK_ROOT)/lib/newlib_x86_32/Debug
+LDFLAGS_X86_32 += -L$(THIS_MAKEFILE)/lib/libav-9.6/build-nacl-i686-newlib
+LDFLAGS_X86_64 := -L$(NACL_SDK_ROOT)/lib/newlib_x86_64/Debug
+LDFLAGS_X86_64 += -L$(THIS_MAKEFILE)/lib/libav-9.6/build-nacl-x86_64-newlib
 
 #
 # Disable DOS PATH warning when using Cygwin based tools Windows
@@ -56,7 +61,7 @@ export CYGWIN
 
 
 # Declare the ALL target first, to make the 'all' target the default build
-all: $(PROJECT)_x86_32.nexe $(PROJECT)_x86_64.nexe $(PROJECT)_arm.nexe
+all: $(PROJECT)_x86_32.nexe $(PROJECT)_x86_64.nexe
 
 # Define 32 bit compile and link rules for main application
 x86_32_OBJS:=$(patsubst %.cc,%_32.o,$(CXX_SOURCES))
@@ -74,20 +79,8 @@ $(x86_64_OBJS) : %_64.o : %.cc $(THIS_MAKE)
 $(PROJECT)_x86_64.nexe : $(x86_64_OBJS)
 	$(X86_CXX) -o $@ $^ -m64 -O0 -g $(CXXFLAGS) $(LDFLAGS_X86_64) $(LDFLAGS)
 
-# Define ARM compile and link rules for C++ sources
-ARM_OBJS:=$(patsubst %.cc,%_arm.o,$(CXX_SOURCES))
-$(ARM_OBJS) : %_arm.o : %.cc $(THIS_MAKE)
-	$(ARM_CXX) -o $@ -c $< -O0 -g $(CXXFLAGS)
-
-$(PROJECT)_arm.nexe : $(ARM_OBJS)
-	$(ARM_CXX) -o $@ $^ -O0 -g $(CXXFLAGS) $(LDFLAGS_ARM) $(LDFLAGS)
-
-# Define a phony rule so it always runs, to build nexe and start up server.
-.PHONY: RUN 
-RUN: all
-	python ../httpd.py
-
+clean: 
+	rm -f *.o *.nexe 
 
 X86_CXX?=$(X86_TC_PATH)/$(OSNAME)_x86_newlib/bin/i686-nacl-g++ -c
-ARM_CXX?=$(X86_TC_PATH)/$(OSNAME)_arm_newlib/bin/arm-nacl-g++ -c
 
