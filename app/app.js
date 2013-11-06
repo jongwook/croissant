@@ -95,6 +95,7 @@ var Croissant;
                     return child.addFolder(components.join("/"), id);
                 } else {
                     console.warn(name + " already exists and not a directory");
+                    return null;
                 }
             }
         };
@@ -191,11 +192,11 @@ var Croissant;
                         console.error(response.error);
                         throw new Error("loadAllFiles error");
                     }
-                    var items = response.items.filter(function (item) {
+                    var items = response.items ? response.items.filter(function (item) {
                         return extensions.filter(function (ext) {
                             return item.title.match(ext);
-                        }).length;
-                    });
+                        }).length > 0;
+                    }) : [];
                     angular.forEach(items, function (item) {
                         files[item.id] = new Croissant.File(item.id, item.title, item.fileSize, item.downloadUrl);
                     });
@@ -207,8 +208,13 @@ var Croissant;
                         });
                         retrieve(request);
                     } else {
-                        console.log("File loading complete; loading tree");
-                        loadFileTree(Drive.ROOT, "", callback);
+                        if (Object.keys(files).length === 0) {
+                            console.log("No files found; aborting...");
+                            callback(true);
+                        } else {
+                            console.log("File loading complete; loading tree");
+                            loadFileTree(Drive.ROOT, "", callback);
+                        }
                     }
                 });
             };

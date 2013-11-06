@@ -57,12 +57,12 @@ module Croissant {
 
 		export function loadAllFiles(callback: (boolean) => void) {
 			var retrieve = request => {
-				request.execute(response => {
+				request.execute((response: gapi.client.drive.files.ListResponse) => {
 					if (!response || response.error) {
 						console.error(response.error);
 						throw new Error("loadAllFiles error");
 					}
-					var items = response.items.filter(item => extensions.filter(ext => item.title.match(ext)).length);
+					var items = response.items ? response.items.filter(item => extensions.filter(ext => item.title.match(ext)).length > 0) : [];
 					angular.forEach(items, item => {
 						//console.log(item.mimeType + ": " + item.title);
 						files[item.id] = new File(item.id, item.title, item.fileSize, item.downloadUrl);
@@ -75,8 +75,13 @@ module Croissant {
 						});
 						retrieve(request);
 					} else {
-						console.log("File loading complete; loading tree");
-						loadFileTree(ROOT, "", callback);
+						if (Object.keys(files).length === 0) {
+							console.log("No files found; aborting...");
+							callback(true);
+						} else {
+							console.log("File loading complete; loading tree");
+							loadFileTree(ROOT, "", callback);
+						}
 					}
 				});
 			}
@@ -94,7 +99,7 @@ module Croissant {
 		function loadSubTree(folderId: string, path: string, callback: (boolean) => void) {
 			loading_subtrees++;
 			var retrieve = (request, folderId, path) => {
-				request.execute((response) => {
+				request.execute((response: gapi.client.drive.children.ListResponse) => {
 					if (!response || response.error) {
 						console.error(response.error);
 						throw new Error("loadSubTree error");
@@ -122,7 +127,7 @@ module Croissant {
 			};
 			gapi.client.drive.files.get({
 				'fileId': folderId
-			}).execute((item) => {
+			}).execute((item: gapi.client.drive.files.GetResponse) => {
 				var request = gapi.client.drive.children.list({
 					folderId: folderId,
 					q: QUERY_FOLDER,
@@ -135,7 +140,7 @@ module Croissant {
 		function loadFileTree(folderId: string, path: string, callback: (boolean) => void) {
 			loading_filetrees++;
 			var retrieve = (request, folderId, path) => {
-				request.execute((response) => {
+				request.execute((response: gapi.client.drive.children.ListResponse) => {
 					if (!response || response.error) {
 						console.error(response.error);
 						throw new Error("loadFileTree error");
@@ -167,7 +172,7 @@ module Croissant {
 
 			gapi.client.drive.files.get({
 				'fileId': folderId
-			}).execute((item) => {
+			}).execute((item: gapi.client.drive.files.GetResponse) => {
 				var request = gapi.client.drive.children.list({
 					folderId: folderId,
 					q: QUERY_AUDIO,

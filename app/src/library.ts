@@ -41,6 +41,7 @@ module Croissant {
 					return child.addFolder(components.join("/"), id);
 				} else {
 					console.warn(name + " already exists and not a directory");
+					return null;
 				}
 			}
 		}
