@@ -16,7 +16,7 @@
 # the rest of the makefile is boilerplate for defining build rules.
 #
 PROJECT:=croissant
-CXX_SOURCES:=$(PROJECT).cc
+CXX_SOURCES:=$(wildcard *.cc)
 
 
 #
@@ -29,8 +29,8 @@ THIS_MAKEFILE:=$(abspath $(lastword $(MAKEFILE_LIST)))
 NACL_SDK_ROOT?=$(abspath $(dir $(THIS_MAKEFILE))../..)
 
 # Project Build flags
-WARNINGS:=-Wno-long-long -Wall -Wswitch-enum -pedantic -Werror
-CXXFLAGS:=-pthread -std=gnu++98 $(WARNINGS)
+WARNINGS := -Wno-long-long -Wall -Wswitch-enum -pedantic
+CXXFLAGS := -lpthread -std=gnu++0x $(WARNINGS)
 
 #
 # Compute tool paths
@@ -42,16 +42,16 @@ ARM_TC_PATH:=$(abspath $(NACL_SDK_ROOT)/toolchain/$(OSNAME)_arm_newlib)
 X86_CXX:=$(X86_TC_PATH)/bin/i686-nacl-g++
 ARM_CXX:=$(ARM_TC_PATH)/bin/arm-nacl-g++
 
-CXXFLAGS:=-I$(NACL_SDK_ROOT)/include
+CXXFLAGS += -I$(NACL_SDK_ROOT)/include
 CXXFLAGS += -I../../naclports/out/repository/libav-9.6
 
 LDFLAGS:= -lppapi_cpp -lppapi
-LDFLAGS+= -lavformat -lavcodec -lavutil -lm
+LDFLAGS+= -lavformat -lavcodec -lavutil -lm -lz
 
 LDFLAGS_X86_32 := -L$(NACL_SDK_ROOT)/lib/newlib_x86_32/Debug
-LDFLAGS_X86_32 += -L$(THIS_MAKEFILE)/lib/libav-9.6/build-nacl-i686-newlib
+LDFLAGS_X86_32 += -L$(THIS_MAKEFILE)/lib/i686
 LDFLAGS_X86_64 := -L$(NACL_SDK_ROOT)/lib/newlib_x86_64/Debug
-LDFLAGS_X86_64 += -L$(THIS_MAKEFILE)/lib/libav-9.6/build-nacl-x86_64-newlib
+LDFLAGS_X86_64 += -L$(THIS_MAKEFILE)/lib/x86_64
 
 #
 # Disable DOS PATH warning when using Cygwin based tools Windows
