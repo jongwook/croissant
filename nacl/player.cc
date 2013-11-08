@@ -6,7 +6,7 @@
 #include "croissant.h"
 
 namespace {
-	const uint32_t SAMPLE_FRAME_COUNT = 2048u;
+	const uint32_t SAMPLE_FRAME_COUNT = 4096;
 	const uint32_t CHANNELS = 2u;
 
 	void forward(void* samples, uint32_t buffer_size, void* data) {
@@ -31,12 +31,9 @@ static int kChannels = 2;
 static double theta = 0;
 
 void CroissantPlayer::playback(void* samples, uint32_t buffer_size) {
-	//info("providing " + to_string(buffer_size) + " samples to audio");
 	uint32_t size = buffer_size / sizeof(int16_t) * sizeof(uint8_t);
 	std::vector<int16_t> incoming = samples_.pop(size);
 	memcpy(samples, incoming.data(), incoming.size() * sizeof(int16_t));
-	//log("copied : " + to_string(incoming.size() * sizeof(int16_t)) + ", requested : " + to_string(buffer_size));
-
 }
 
 void CroissantPlayer::init() {

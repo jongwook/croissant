@@ -35,7 +35,7 @@ public:
 		while (!buffer_.empty() && buffer_.front().size() <= length - filled) {
 			// copy whole chunk
 			std::vector<T> &front = buffer_.front();
-			memcpy(result.data() + filled, front.data(), front.size());
+			memcpy(result.data() + filled, front.data(), front.size() * sizeof(T));
 			filled += front.size();
 			length_ -= front.size();
 			buffer_.pop();
@@ -45,7 +45,7 @@ public:
 			uint32_t remaining = length - filled;
 
 			std::vector<T> &front = buffer_.front();
-			memcpy(result.data() + filled, front.data(), remaining);
+			memcpy(result.data() + filled, front.data(), remaining * sizeof(T));
 			filled += remaining;
 
 			buffer_.front() = std::vector<T>(front.data() + remaining, front.data() + front.size());
