@@ -12,7 +12,7 @@ public:
 	void init();
 
 	void reset();
-	void append(const uint8_t * buffer, int32_t length, bool finalize = false);
+	bool append(const uint8_t * buffer, int32_t length, bool finalize = false);
 
 
 private:
