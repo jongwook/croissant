@@ -48,14 +48,14 @@ void CroissantPlayer::init() {
 }
 
 void CroissantPlayer::play() {
-
+	audio_.StartPlayback();
 }
 
 void CroissantPlayer::pause() {
-
+	audio_.StopPlayback();
 }
 
 void CroissantPlayer::clear() {
-
+	samples_.clear();
 }
 

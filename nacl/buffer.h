@@ -20,6 +20,10 @@ public:
 		buffer_.emplace(buffer, buffer + length);
 	}
 
+	void clear() {
+		std::queue<std::vector<T>>().swap(buffer_);
+	}
+
 	uint32_t size() {
 		return buffer_.size();
 	}

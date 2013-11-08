@@ -55,12 +55,10 @@ module Croissant {
 				self.album = file.parent ? file.parent.name : file.name;
 				self.track = file.name;
 
-				self.status = "loading...";
+				self.status = "";
 				var accessToken = gapi.auth.getToken().access_token;
 				message("token", accessToken);
 				message("load", file.url);
-
-
 			} else {
 				console.warn("Tried to download invalid url : " + file.name);
 			}

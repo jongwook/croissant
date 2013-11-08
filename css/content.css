@@ -74,7 +74,7 @@
 
 .tracklist-album-data li:after {
 	float: right;
-	content: "⊕⊕";
+	content: "⊕";
 	font-size: 12pt;
 	font-weight: bold;
 	color: #ece6d1;

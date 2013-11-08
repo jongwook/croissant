@@ -30,10 +30,11 @@
 
 #player #player-prev {
 	left: 10px;
-	top: 40px;
+	top: 41px;
 	width: 60px;
 	height: 60px;
-	background-image: url(../images/prev.png);
+	background-image: url(../images/prev.svg);
+	background-repeat: no-repeat;
 }
 
 #player #player-play {
@@ -41,7 +42,8 @@
 	top: 32px;
 	width: 75px;
 	height: 75px;
-	background-image: url(../images/play.png);
+	background-image: url(../images/play.svg);
+	background-repeat: no-repeat;
 }
 
 #player #player-pause {
@@ -52,15 +54,18 @@
 	width: 75px;
 	height: 75px;
 	background-image: url(../images/pause.png);
+	background-repeat: no-repeat;
 }
 
 #player #player-ff {
 	left: 145px;
-	top: 40px;
+	top: 41px;
 
 	width: 60px;
 	height: 60px;
-	background-image: url(../images/ff.png);
+	background-image: url(../images/ff.svg);
+	background-repeat: no-repeat;
+	background-position: 2px 0;
 }
 
 #player .player-repeat {

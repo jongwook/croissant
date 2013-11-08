@@ -34,11 +34,14 @@ void CroissantDecoder::init() {
 }
 
 void CroissantDecoder::reset() {
+	if (m.get()) {
+		mpg123_close(m.get());
+	}
 	m = std::shared_ptr<mpg123_handle>(mpg123_new(NULL, NULL), mpg123_delete);
+	player_->clear();
+	buffer_.clear();
+	initialized = false;
 }
-
-int bytes = 0;
-int total = 0;
 
 bool CroissantDecoder::append(const uint8_t * buffer, int32_t length, bool finalize) {
 	static std::vector<uint8_t> cache;
