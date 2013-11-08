@@ -18,10 +18,14 @@ void CroissantDownloader::CroissantDownloader::init() {
 void CroissantDownloader::download(const std::string &url) {
 	info("Downloading stream from " + url);
 
+	pp::Var headers("Authorization: Bearer " + token_);
+
 	url_request_ = pp::URLRequestInfo(instance());
 	url_request_.SetURL(url);
 	url_request_.SetMethod("GET");
 	url_request_.SetRecordDownloadProgress(true);
+	url_request_.SetAllowCrossOriginRequests(true);
+	url_request_.SetHeaders(headers);
 
 	pp::CompletionCallback cc = cc_factory_.NewCallback(&CroissantDownloader::onOpen);
 
@@ -29,7 +33,7 @@ void CroissantDownloader::download(const std::string &url) {
 	url_loader_ = pp::URLLoader(instance());
 	url_loader_.Open(url_request_, cc);
 
-	info("Url request opened");
+	info("Url request to " + url + " opened with headers " + headers.AsString());
 }
 
 void CroissantDownloader::onOpen(int32_t result) {

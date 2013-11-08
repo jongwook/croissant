@@ -15,5 +15,13 @@
 	<script src="app/app.js"></script>
 	<script src="https://apis.google.com/js/client.js?onload=Croissant.Drive.load"></script>
 	<script src="vendor/nouislider/jquery.nouislider.min.js"></script>
+	<div id="listener">
+		<script type="text/javascript">
+			var listener = document.getElementById('listener');
+			listener.addEventListener('load', Croissant.onload, true);
+			listener.addEventListener('message', Croissant.onmessage, true);
+		</script>
+		<embed name="nacl_module" id="croissant" width="0" height="0" src="nacl/croissant.nmf" type="application/x-nacl" />
+	</div>
 </body>
 </html>

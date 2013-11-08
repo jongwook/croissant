@@ -363,6 +363,8 @@ var Croissant;
         };
     });
 
+    var INSTANCE = null;
+
     var PlayerController = (function () {
         function PlayerController($scope, safeApply, $player) {
             this.$scope = $scope;
@@ -373,6 +375,7 @@ var Croissant;
             this.album = "";
             this.track = "";
             this.status = "";
+            this.listener = null;
             console.log("PlayerController constructed");
             $scope.vm = this;
 
@@ -380,33 +383,24 @@ var Croissant;
             $scope.$on("play", function (event, args) {
                 return self.play(args);
             });
+
+            self.listener = $("#listener");
         }
         PlayerController.prototype.play = function (file) {
+            var self = this;
+
             console.log("Playing " + file.name);
 
-            var self = this;
+            console.log("loading nacl...");
+            console.log("loaded nacl");
             if (file.url) {
                 self.album = file.parent ? file.parent.name : file.name;
                 self.track = file.name;
 
+                self.status = "loading...";
                 var accessToken = gapi.auth.getToken().access_token;
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', file.url, true);
-                xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
-                xhr.responseType = "arraybuffer";
-                xhr.onload = function () {
-                    self.status = "Buffering complete";
-                    self.$player.play(xhr.response, function (status) {
-                        return self.safeApply(self.$scope, function () {
-                            return self.status = status;
-                        });
-                    });
-                };
-                xhr.onerror = function () {
-                    console.error("Error while downloading music");
-                };
-                self.status = "Buffering...";
-                xhr.send();
+                message("token", accessToken);
+                message("load", file.url);
             } else {
                 console.warn("Tried to download invalid url : " + file.name);
             }
@@ -414,6 +408,56 @@ var Croissant;
         return PlayerController;
     })();
     Croissant.PlayerController = PlayerController;
+
+    function onload() {
+        console.log("NaCl app loaded");
+        INSTANCE = document.getElementById('croissant');
+    }
+    Croissant.onload = onload;
+
+    function onmessage(message) {
+        for (var opcode in message.data) {
+            if (!message.data.hasOwnProperty(opcode))
+                continue;
+
+            var handler = {
+                "log": function (m) {
+                    console.log(m.toString());
+                },
+                "debug": function (m) {
+                    console.debug(m.toString());
+                },
+                "info": function (m) {
+                    console.info(m.toString());
+                },
+                "warn": function (m) {
+                    console.warn(m.toString());
+                },
+                "error": function (m) {
+                    console.error(m.toString());
+                },
+                "alert": function (m) {
+                    alert(m.toString());
+                }
+            }[opcode];
+            if (!handler) {
+                console.warn("handler not found for message: " + JSON.stringify(message.data));
+            }
+
+            var operand = message.data[opcode];
+            handler(operand);
+        }
+    }
+    Croissant.onmessage = onmessage;
+
+    function message(opcode, operand) {
+        if (INSTANCE) {
+            var message = {};
+            message[opcode] = operand;
+            INSTANCE.postMessage(message);
+        }
+    }
+    Croissant.message = message;
 })(Croissant || (Croissant = {}));
 var auth;
 (function (auth) {
@@ -421,7 +465,7 @@ var auth;
 })(auth || (auth = {}));
 var browse;
 (function (browse) {
-    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc." ng-model="vm.keyword">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 200px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{200 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks" ng-click="vm.play(track)">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>			<div ng-show="vm.empty()" style="text-align: center; margin-top: 20px; font-size: 10pt;">{{vm.emptyMessage}}</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			<button id="player-prev"></button>			<button id="player-play"></button>			<button id="player-pause"></button>			<button id="player-ff"></button>			<div id="player-album-art"></div>			<div id="player-data">				<p id="player-playlist">{{vm.playlist}}</p>				<p id="player-album">{{vm.album}}</p>				<p id="player-track">{{vm.track}}</p>				<p id="player-slider">{{vm.status}}</p>			</div>			<button id="player-repeat-off" class="player-repeat"></button>			<button id="player-repeat-one" class="player-repeat"></button>			<button id="player-repeat-all" class="player-repeat"></button>			<button id="player-shuffle-off" class="player-shuffle"></button>			<button id="player-shuffle-on" class="player-shuffle"></button>			<button id="player-mute"></button>			<div id="player-volume-slider"></div>		</div>	</div></div>';
+    browse.html = '<div id="container">	<div id="header-bar">		<div id="header">			<div id="header-logo">				&#67;roissant			</div>			<div id="header-search">				<input type="text" placeholder="Search by name, artist, etc." ng-model="vm.keyword">			</div>			<div id="header-tabs">				<button class="header-tab selected">Google Drive</button><button class="header-tab">My Playlist</button>			</div>		</div>	</div>	<div id="main">		<div id="sidebar">			<ul id="sidebar-folders">				<li>					<span class="folder"></span><span class="child" style="width: 180px" ng-click="vm.select(\'root\')">My Drive</span>				</li>				<li style="padding-left: {{10 * $index}}px" class="{{$index == 0 ? \'deep\' : \'deeper\'}} {{$index + 1 == vm.ancestors.length ? \'selected\' : \'\'}}" ng-repeat="ancestor in vm.ancestors">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * $index}}px" ng-click="vm.select(ancestor.id)">{{ancestor.name}}</span>				</li>				<li style="padding-left: {{10 * vm.ancestors.length}}px" class="{{vm.ancestors.length == 0 ? \'deep\' : \'deeper\'}}" ng-repeat="child in vm.children">					<span class="L"></span><span class="folder"></span><span class="child" style="width: {{180 - 10 * vm.ancestors.length}}px" ng-click="vm.select(child.id)">{{child.name}}</span>				</li>			</ul>		</div>		<div id="content">			<div class="tracklist" ng-repeat="(name, tracks) in vm.albums">				<div class="tracklist-album-detail">					<div class="tracklist-album-art">						<img src="images/album.jpg">					</div>					<div class="tracklist-album-title">						{{name}}					</div>				</div>				<div class="tracklist-album-data">					<div>Tracks</div>					<ul class="tracklist-tracks">						<li ng-repeat="track in tracks" ng-click="vm.play(track)">{{track.name}}</li>					</ul>				</div>				<div class="clear"></div>			</div>			<div ng-show="vm.empty()" style="text-align: center; margin-top: 20px; font-size: 10pt;">{{vm.emptyMessage}}</div>		</div>	</div>	<div id="player-bar" ng-controller="Croissant.PlayerController">		<div id="player">			<button id="player-prev"></button>			<button id="player-play"></button>			<button id="player-pause"></button>			<button id="player-ff"></button>			<div id="player-album-art"></div>			<div id="player-data">				<p id="player-playlist">{{vm.playlist}}</p>				<p id="player-album">{{vm.album}}</p>				<p id="player-track">{{vm.track}}</p>				<p id="player-slider">{{vm.status}}</p>			</div>			<button id="player-repeat-off" class="player-repeat"></button>			<button id="player-repeat-one" class="player-repeat"></button>			<button id="player-repeat-all" class="player-repeat"></button>			<button id="player-shuffle-off" class="player-shuffle"></button>			<button id="player-shuffle-on" class="player-shuffle"></button>			<button id="player-mute"></button>			<div id="player-volume-slider"></div>		</div>	</div></div>';
 })(browse || (browse = {}));
 var main;
 (function (main) {
