@@ -33,6 +33,7 @@ public:
 
 	// handlers
 	void token(const std::string &token);
+	void load(const std::string &url);
 
 	// post a message to browser, in {opcode: operand} format
 	void post(const std::string &opcode, const std::string &message);
@@ -47,9 +48,9 @@ public:
 	void alert(const std::string &message) {	post("alert", message);	}
 
 private:
-	CroissantDownloader downloader_;
-	CroissantDecoder decoder_;
 	CroissantPlayer player_;
+	CroissantDecoder decoder_;
+	CroissantDownloader downloader_;
 };
 
 typedef void (CroissantInstance::*CROISSANT_HANDLER)(const std::string &operand);

@@ -5,21 +5,29 @@
 
 #include "ppapi/cpp/url_loader.h"
 #include "ppapi/cpp/url_request_info.h"
+#include "ppapi/cpp/url_response_info.h"
 #include "ppapi/cpp/completion_callback.h"
 #include "ppapi/utility/completion_callback_factory.h"
 
+class CroissantDecoder;
+
 class CroissantDownloader: public CroissantComponent {
 public:
-	CroissantDownloader(CroissantInstance *instance);
+	CroissantDownloader(CroissantInstance *instance, CroissantDecoder *decoder);
 
 	void init();
 
 	void download(const std::string &url);
+	void onOpen(int32_t result);
+	void read();
+	void onRead(int32_t result);
+	void output(const char * buffer, int32_t length);
 
 	void token(const std::string &token);
 
 private:
-	buffer<uint8_t> buffer_;
+	CroissantDecoder *decoder_;
+
 	std::string token_;
 
 	pp::URLRequestInfo url_request_;

@@ -43,15 +43,15 @@ X86_CXX:=$(X86_TC_PATH)/bin/i686-nacl-g++
 ARM_CXX:=$(ARM_TC_PATH)/bin/arm-nacl-g++
 
 CXXFLAGS += -I$(NACL_SDK_ROOT)/include
-CXXFLAGS += -I../../naclports/out/repository/libav-9.6
+CXXFLAGS += -I$(dir $(THIS_MAKEFILE))include
 
 LDFLAGS:= -lppapi_cpp -lppapi
 LDFLAGS+= -lavformat -lavcodec -lavutil -lm -lz
 
 LDFLAGS_X86_32 := -L$(NACL_SDK_ROOT)/lib/newlib_x86_32/Debug
-LDFLAGS_X86_32 += -L$(THIS_MAKEFILE)/lib/i686
+LDFLAGS_X86_32 += -L$(dir $(THIS_MAKEFILE))lib/i686
 LDFLAGS_X86_64 := -L$(NACL_SDK_ROOT)/lib/newlib_x86_64/Debug
-LDFLAGS_X86_64 += -L$(THIS_MAKEFILE)/lib/x86_64
+LDFLAGS_X86_64 += -L$(dir $(THIS_MAKEFILE))lib/x86_64
 
 #
 # Disable DOS PATH warning when using Cygwin based tools Windows

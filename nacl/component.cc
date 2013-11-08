@@ -5,10 +5,6 @@ CroissantComponent::CroissantComponent(CroissantInstance *instance) : instance_(
 
 }
 
-CroissantInstance* CroissantComponent::instance() {
-	return instance_;
-}
-
 void CroissantComponent::log  (const std::string &message) {	instance()->log  (message);	}
 void CroissantComponent::trace(const std::string &message) {	instance()->trace(message);	}
 void CroissantComponent::debug(const std::string &message) {	instance()->debug(message);	}

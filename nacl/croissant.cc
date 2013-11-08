@@ -20,9 +20,9 @@ namespace {
 
 CroissantInstance::CroissantInstance(PP_Instance instance) :
 	pp::Instance(instance),
-	downloader_(this),
-	decoder_(this),
-	player_(this)
+	player_(this),
+	decoder_(this, &player_),
+	downloader_(this, &decoder_)
 {
 	debug("CroissantInstance constructed");
 }
@@ -34,7 +34,9 @@ CroissantInstance::~CroissantInstance() {
 bool CroissantInstance::Init(uint32_t argc, const char* argn[], const char* argv[]) {
 	debug("Initializing CroissantInstance ...");
 
+	// the routing table
 	handlers["token"] = &CroissantInstance::token;
+	handlers["load"] = &CroissantInstance::load;
 
 	downloader_.init();
 	decoder_.init();
@@ -89,6 +91,10 @@ void CroissantInstance::dispatch(const std::string &opcode, const std::string &o
 
 void CroissantInstance::token(const std::string &token) {
 	downloader_.token(token);
+}
+
+void CroissantInstance::load(const std::string &url) {
+	downloader_.download(url);
 }
 
 void CroissantInstance::post(const std::string &opcode, const std::string &message) {

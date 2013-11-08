@@ -11,7 +11,7 @@ public:
 	CroissantComponent(CroissantInstance *instance);
 
 protected:
-	inline CroissantInstance* instance();
+	inline CroissantInstance* instance() { return instance_; }
 
 public:
 	void log  (const std::string &message);
