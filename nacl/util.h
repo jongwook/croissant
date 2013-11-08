@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstring>
 #include <sstream>
 
 void croissant_log(const std::string& message);

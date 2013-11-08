@@ -29,7 +29,7 @@ public:
 
 private:
 	// stored audio samples
-	buffer<uint16_t> samples;
+	buffer<int16_t> samples_;
 
 	// the audio
 	pp::Audio audio_;

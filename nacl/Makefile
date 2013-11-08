@@ -46,7 +46,7 @@ CXXFLAGS += -I$(NACL_SDK_ROOT)/include
 CXXFLAGS += -I$(dir $(THIS_MAKEFILE))include
 
 LDFLAGS:= -lppapi_cpp -lppapi
-LDFLAGS+= -lavformat -lavcodec -lavutil -lm -lz
+LDFLAGS+= -lmpg123 -lopenal -lm -lz
 
 LDFLAGS_X86_32 := -L$(NACL_SDK_ROOT)/lib/newlib_x86_32/Debug
 LDFLAGS_X86_32 += -L$(dir $(THIS_MAKEFILE))lib/i686
