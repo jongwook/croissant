@@ -21,7 +21,7 @@ public:
 	void onOpen(int32_t result);
 	void read();
 	void onRead(int32_t result);
-	void output(const char * buffer, int32_t length);
+	void output(const uint8_t * buffer, int32_t length);
 
 	void token(const std::string &token);
 
@@ -35,4 +35,6 @@ private:
 
 	pp::CompletionCallbackFactory<CroissantDownloader> cc_factory_;
 
+	static const int READ_BUFFER_SIZE = 20480;
+	uint8_t buffer_[READ_BUFFER_SIZE];
 };

@@ -3,11 +3,6 @@
 #include "util.h"
 #include "decoder.h"
 
-namespace {
-	const int READ_BUFFER_SIZE = 4096;
-	char buffer_[READ_BUFFER_SIZE];
-}
-
 CroissantDownloader::CroissantDownloader(CroissantInstance *instance, CroissantDecoder *decoder):
 	CroissantComponent(instance),
 	decoder_(decoder),
@@ -17,7 +12,7 @@ CroissantDownloader::CroissantDownloader(CroissantInstance *instance, CroissantD
 }
 
 void CroissantDownloader::CroissantDownloader::init() {
-
+	info("CroissantDownloader initialized");
 }
 
 void CroissantDownloader::download(const std::string &url) {
@@ -65,6 +60,7 @@ void CroissantDownloader::onOpen(int32_t result) {
 	url_request_.SetRecordDownloadProgress(false);
 
 	// Start streaming.
+	decoder_->reset();
 	read();
 }
 
@@ -89,6 +85,7 @@ void CroissantDownloader::read() {
 void CroissantDownloader::onRead(int32_t result) {
 	if (result == PP_OK) {
 		log("Downloading complete");
+		decoder_->append(buffer_, 0, true);
 	} else if (result > 0) {
 		output(buffer_, result);
 		read();
@@ -97,7 +94,7 @@ void CroissantDownloader::onRead(int32_t result) {
 	}
 }
 
-void CroissantDownloader::output(const char * buffer, int32_t length) {
+void CroissantDownloader::output(const uint8_t * buffer, int32_t length) {
 	decoder_->append(buffer, length);
 }
 

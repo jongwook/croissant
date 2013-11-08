@@ -9,6 +9,7 @@ class CroissantInstance;
 class CroissantComponent {
 public:
 	CroissantComponent(CroissantInstance *instance);
+	virtual ~CroissantComponent() {}
 
 protected:
 	inline CroissantInstance* instance() { return instance_; }

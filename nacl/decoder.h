@@ -7,12 +7,16 @@
 class CroissantDecoder: public CroissantComponent {
 public:
 	CroissantDecoder(CroissantInstance *instance, CroissantPlayer *player);
+	virtual ~CroissantDecoder();
 
 	void init();
 
-	void append(const char * buffer, int32_t length);
+	void reset();
+	void append(const uint8_t * buffer, int32_t length, bool finalize = false);
+
 
 private:
 	CroissantPlayer *player_;
 	buffer<uint8_t> buffer_;
+
 };

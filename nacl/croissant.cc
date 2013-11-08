@@ -1,10 +1,20 @@
 
 #include "croissant.h"
+#include "util.h"
 
 // the entry point: return a CroissantModule
 namespace pp {
 	Module* CreateModule() {
 		return new CroissantModule();
+	}
+}
+
+// for global debug logging
+CroissantInstance* g_instance = NULL;
+
+void croissant_log(const std::string& message) {
+	if (g_instance) {
+		g_instance->log(message);
 	}
 }
 
@@ -25,6 +35,7 @@ CroissantInstance::CroissantInstance(PP_Instance instance) :
 	downloader_(this, &decoder_)
 {
 	debug("CroissantInstance constructed");
+	g_instance = this;
 }
 
 CroissantInstance::~CroissantInstance() {
@@ -87,6 +98,8 @@ void CroissantInstance::dispatch(const std::string &opcode, const std::string &o
 
 	CROISSANT_HANDLER handler = handlers[opcode];
 	(this->*handler)(operand);
+
+	debug("Dispatched message " + opcode);
 }
 
 void CroissantInstance::token(const std::string &token) {
@@ -94,6 +107,7 @@ void CroissantInstance::token(const std::string &token) {
 }
 
 void CroissantInstance::load(const std::string &url) {
+	debug("loading : " + url);
 	downloader_.download(url);
 }
 

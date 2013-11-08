@@ -519,7 +519,7 @@ enum Motion_Est_ID {
     ME_HEX,         ///< hexagon based search
     ME_UMH,         ///< uneven multi-hexagon search
     ME_ITER,        ///< iterative search
-    ME_TESA,        ///< transformed exhaustive search algorithm
+    ME_TESA        ///< transformed exhaustive search algorithm
 };
 
 /**
@@ -533,7 +533,7 @@ enum AVDiscard{
     AVDISCARD_NONREF  =  8, ///< discard all non reference
     AVDISCARD_BIDIR   = 16, ///< discard all bidirectional frames
     AVDISCARD_NONKEY  = 32, ///< discard all frames except keyframes
-    AVDISCARD_ALL     = 48, ///< discard all
+    AVDISCARD_ALL     = 48 ///< discard all
 };
 
 enum AVColorPrimaries{
@@ -544,7 +544,7 @@ enum AVColorPrimaries{
     AVCOL_PRI_SMPTE170M   = 6, ///< also ITU-R BT601-6 525 / ITU-R BT1358 525 / ITU-R BT1700 NTSC
     AVCOL_PRI_SMPTE240M   = 7, ///< functionally identical to above
     AVCOL_PRI_FILM        = 8,
-    AVCOL_PRI_NB             , ///< Not part of ABI
+    AVCOL_PRI_NB              ///< Not part of ABI
 };
 
 enum AVColorTransferCharacteristic{
@@ -553,7 +553,7 @@ enum AVColorTransferCharacteristic{
     AVCOL_TRC_GAMMA22     = 4, ///< also ITU-R BT470M / ITU-R BT1700 625 PAL & SECAM
     AVCOL_TRC_GAMMA28     = 5, ///< also ITU-R BT470BG
     AVCOL_TRC_SMPTE240M   = 7,
-    AVCOL_TRC_NB             , ///< Not part of ABI
+    AVCOL_TRC_NB              ///< Not part of ABI
 };
 
 enum AVColorSpace{
@@ -565,14 +565,14 @@ enum AVColorSpace{
     AVCOL_SPC_SMPTE170M   = 6, ///< also ITU-R BT601-6 525 / ITU-R BT1358 525 / ITU-R BT1700 NTSC / functionally identical to above
     AVCOL_SPC_SMPTE240M   = 7,
     AVCOL_SPC_YCOCG       = 8, ///< Used by Dirac / VC-2 and H.264 FRext, see ITU-T SG16
-    AVCOL_SPC_NB             , ///< Not part of ABI
+    AVCOL_SPC_NB              ///< Not part of ABI
 };
 
 enum AVColorRange{
     AVCOL_RANGE_UNSPECIFIED = 0,
     AVCOL_RANGE_MPEG        = 1, ///< the normal 219*2^(n-8) "MPEG" YUV ranges
     AVCOL_RANGE_JPEG        = 2, ///< the normal     2^n-1   "JPEG" YUV ranges
-    AVCOL_RANGE_NB             , ///< Not part of ABI
+    AVCOL_RANGE_NB              ///< Not part of ABI
 };
 
 /**
@@ -588,7 +588,7 @@ enum AVChromaLocation{
     AVCHROMA_LOC_TOP         = 4,
     AVCHROMA_LOC_BOTTOMLEFT  = 5,
     AVCHROMA_LOC_BOTTOM      = 6,
-    AVCHROMA_LOC_NB             , ///< Not part of ABI
+    AVCHROMA_LOC_NB              ///< Not part of ABI
 };
 
 enum AVAudioServiceType {
@@ -601,7 +601,7 @@ enum AVAudioServiceType {
     AV_AUDIO_SERVICE_TYPE_EMERGENCY         = 6,
     AV_AUDIO_SERVICE_TYPE_VOICE_OVER        = 7,
     AV_AUDIO_SERVICE_TYPE_KARAOKE           = 8,
-    AV_AUDIO_SERVICE_TYPE_NB                   , ///< Not part of ABI
+    AV_AUDIO_SERVICE_TYPE_NB                    ///< Not part of ABI
 };
 
 /**
@@ -870,7 +870,7 @@ enum AVPacketSideDataType {
      * u8    vertical MV predictor for block number 3
      * @endcode
      */
-    AV_PKT_DATA_H263_MB_INFO,
+    AV_PKT_DATA_H263_MB_INFO
 };
 
 /**
@@ -965,7 +965,7 @@ enum AVSideDataParamChangeFlags {
     AV_SIDE_DATA_PARAM_CHANGE_CHANNEL_COUNT  = 0x0001,
     AV_SIDE_DATA_PARAM_CHANGE_CHANNEL_LAYOUT = 0x0002,
     AV_SIDE_DATA_PARAM_CHANGE_SAMPLE_RATE    = 0x0004,
-    AV_SIDE_DATA_PARAM_CHANGE_DIMENSIONS     = 0x0008,
+    AV_SIDE_DATA_PARAM_CHANGE_DIMENSIONS     = 0x0008
 };
 /**
  * @}
@@ -1326,7 +1326,7 @@ enum AVFieldOrder {
     AV_FIELD_TT,          //< Top coded_first, top displayed first
     AV_FIELD_BB,          //< Bottom coded first, bottom displayed first
     AV_FIELD_TB,          //< Top coded first, bottom displayed first
-    AV_FIELD_BT,          //< Bottom coded first, top displayed first
+    AV_FIELD_BT          //< Bottom coded first, top displayed first
 };
 
 /**
@@ -3177,7 +3177,7 @@ enum AVSubtitleType {
      * Formatted text, the ass field must be set by the decoder and is
      * authoritative. pict and text fields may contain approximations.
      */
-    SUBTITLE_ASS,
+    SUBTITLE_ASS
 };
 
 #define AV_SUBTITLE_FLAG_FORCED 0x00000001
@@ -4592,7 +4592,7 @@ enum AVLockOp {
   AV_LOCK_CREATE,  ///< Create a mutex
   AV_LOCK_OBTAIN,  ///< Lock the mutex
   AV_LOCK_RELEASE, ///< Unlock the mutex
-  AV_LOCK_DESTROY, ///< Free mutex resources
+  AV_LOCK_DESTROY ///< Free mutex resources
 };
 
 /**
